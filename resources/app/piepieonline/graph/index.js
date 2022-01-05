@@ -1,9 +1,12 @@
 // https://js.cytoscape.org
 
+window.ignoredEntityIds = [];
+
 function load(entityToProcess, MAX_NODE_COUNT = 100) {
     window.entityToProcess = entityToProcess;
+    document.getElementById('entitiesToLoad').value = MAX_NODE_COUNT;
 
-    const { nodes, edges, parentNodes } = createModel(entityToProcess, MAX_NODE_COUNT);
+    const { nodes, edges, parentNodes } = createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds);
 
     var cy = cytoscape({
 
@@ -53,8 +56,29 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         }
         else {
             event.target.connectedEdges().select();
+            event.target.connectedEdges().connectedNodes().select();
         }
-    })
+    });
+
+    cy.on('cxttap', (event) => {
+        if(event?.target?.isNode && event.target.isNode())
+        {
+            const ele = document.getElementById('context-menu');
+            ele.classList.toggle('open');
+            ele.style.left = event.originalEvent.pageX;
+            ele.style.top = event.originalEvent.pageY;
+            window.ctxTarget = event.target;
+        }
+        else
+        {
+            closeContextMenu();
+        }
+
+    });
+
+    cy.on('tap', () => {
+        closeContextMenu();
+    });
 
     cy.on('drag', (event) => {
         // For collapsed nodes
@@ -104,4 +128,37 @@ function expand() {
 function selectInTree() {
     externalEditorTree.deselect_all();
     externalEditorTree.select_node(cy.nodes(':selected')[0].data('id'))
+}
+
+function closeContextMenu()
+{
+    document.getElementById('context-menu').classList.remove('open');
+}
+
+function ctxCopy(copyTarget)
+{
+    const id = window.ctxTarget.data('id').split('_')[0];
+    const entity = window.externallyLoadedModel.entities[id];
+
+    switch(copyTarget)
+    {
+        case 'id':
+            navigator.clipboard.writeText(id)
+            break;
+        case 'name':
+            navigator.clipboard.writeText(entity.name)
+            break;
+    }
+
+    closeContextMenu();
+}
+
+function ctxAddToIgnore()
+{
+    const id = window.ctxTarget.data('id');
+    const entity = window.externallyLoadedModel.entities[id];
+
+    window.ignoredEntityIds.push(id);
+
+    closeContextMenu();
 }

@@ -8,14 +8,26 @@
             justify-content: space-between;
             text-align: center;
         }
+
+        .context-menu {
+            display: none;
+            position: absolute;
+            z-index: 1000;
+        }
+        
+        .context-menu.open {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body style="background-color: white;">
     <div style="height: 22px;">
         <button onclick="cy.center('[?isPrimary]')">Recenter</button>
-        <input id="entitiesToLoad" type="number" value=500 /> 
-        <button onclick="load(window.entityToProcess, parseInt(document.getElementById('entitiesToLoad').value))">Load number of entities</button>
+        <label>Max graph entities: <input id="entitiesToLoad" type="number" value=500 /></label>
+        <button onclick="load(window.entityToProcess, parseInt(document.getElementById('entitiesToLoad').value))">Reload</button>
         <button onclick="collapse()">Collapse selected</button>
         <button onclick="expand()">Expand selected</button>
         <button onclick="selectInTree()">Open selected in tree</button>
@@ -35,6 +47,14 @@
     <script src="./templateHelpers.js"></script>
     <script src="./model.js"></script>
     <script src="./index.js"></script>
+    <div id="context-menu" class="context-menu">
+        <button onClick="ctxCopy('id')">Copy ID</button>
+        <button onClick="ctxCopy('name')">Copy Name</button>
+        <button onclick="ctxAddToIgnore()">Add node to ignore list</button>
+        <br />
+        <button onclick="collapse()">Collapse all selected</button>
+        <button onclick="expand()">Expand all selected</button>
+    </div>
 </body>
 
 </html>

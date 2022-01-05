@@ -1,9 +1,10 @@
-function createModel(entityToProcess, MAX_NODE_COUNT)
+function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 {
     let parentNodes = [];
     let edgeIDCounter = 0;
     const createNode = (entity) => {
         const id = entity.entityID;
+
         const entityTemplate = convertTemplate(entity);
 
         const div = document.createElement("div");
@@ -46,8 +47,9 @@ function createModel(entityToProcess, MAX_NODE_COUNT)
             }
             else if (prop.type === 'TArray<SEntityTemplateReference>') {
                 createNodeForProp();
-                prop.value.forEach(otherId => {
-                    createEdgeForProp(otherId);
+                prop.value.forEach(other => {
+                    // Other could be an ID, or an external reference
+                    createEdgeForProp(other.ref || other);
                 })
             }
         }
@@ -92,10 +94,17 @@ function createModel(entityToProcess, MAX_NODE_COUNT)
     while (nodesToProcess.length > 0) {
         function checkAndAddToProcessList(id)
         {
+            if(!window.externallyLoadedModel.entities[id])
+            {
+                console.warn(`${id} is an unknown entity`);
+                return;
+            }
+
             if (
                 !parentNodes.includes(id) &&
                 !nodesToProcess.includes(id) &&
-                !entitiesToIgnore.includes(convertTemplate(window.externallyLoadedModel.entities[id]))
+                !entitiesToIgnore.includes(convertTemplate(window.externallyLoadedModel.entities[id])) &&
+                !ignoredEntityIds.includes(id)
             ) nodesToProcess.push(id);
         }
 
