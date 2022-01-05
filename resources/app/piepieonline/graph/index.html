@@ -50,7 +50,11 @@
     <div id="context-menu" class="context-menu">
         <button onClick="ctxCopy('id')">Copy ID</button>
         <button onClick="ctxCopy('name')">Copy Name</button>
-        <button onclick="ctxAddToIgnore()">Add node to ignore list</button>
+        <button onClick="ctxCopy('template')">Copy Template</button>
+        <button onClick="ctxCopy('entityJSON')">Copy JSON</button>
+        <br />
+        <button onclick="ctxAddToIgnore(true)">Add node to ignore list</button>
+        <button onclick="ctxAddToIgnore(false)">Add selected to ignore list</button>
         <br />
         <button onclick="collapse()">Collapse all selected</button>
         <button onclick="expand()">Expand all selected</button>

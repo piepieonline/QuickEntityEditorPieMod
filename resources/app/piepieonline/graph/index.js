@@ -61,16 +61,14 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
     });
 
     cy.on('cxttap', (event) => {
-        if(event?.target?.isNode && event.target.isNode())
-        {
+        if (event?.target?.isNode && event.target.isNode()) {
             const ele = document.getElementById('context-menu');
             ele.classList.toggle('open');
             ele.style.left = event.originalEvent.pageX;
             ele.style.top = event.originalEvent.pageY;
             window.ctxTarget = event.target;
         }
-        else
-        {
+        else {
             closeContextMenu();
         }
 
@@ -130,35 +128,58 @@ function selectInTree() {
     externalEditorTree.select_node(cy.nodes(':selected')[0].data('id'))
 }
 
-function closeContextMenu()
-{
+function closeContextMenu() {
     document.getElementById('context-menu').classList.remove('open');
 }
 
-function ctxCopy(copyTarget)
-{
+function ctxCopy(copyTarget) {
     const id = window.ctxTarget.data('id').split('_')[0];
     const entity = window.externallyLoadedModel.entities[id];
 
-    switch(copyTarget)
-    {
+    switch (copyTarget) {
         case 'id':
             navigator.clipboard.writeText(id)
             break;
         case 'name':
             navigator.clipboard.writeText(entity.name)
             break;
+        case 'template':
+            navigator.clipboard.writeText(entity.template)
+            break;
+        case 'entityJSON':
+            const newEntity = Object.assign({}, entity);
+            newEntity.parent = undefined;
+            newEntity.entityID = undefined;
+            if(newEntity.properties.m_mTransform)
+            {
+                newEntity.properties.m_mTransform.value.position = { x: newEntity.properties.m_mTransform.value.position.x.value, y: newEntity.properties.m_mTransform.value.position.y.value, z: newEntity.properties.m_mTransform.value.position.z.value }
+                newEntity.properties.m_mTransform.value.rotation = { x: newEntity.properties.m_mTransform.value.rotation.x.value, y: newEntity.properties.m_mTransform.value.rotation.y.value, z: newEntity.properties.m_mTransform.value.rotation.z.value }
+            }
+            let newEntityString = JSON.stringify(newEntity, null, 4);
+            navigator.clipboard.writeText(newEntityString.substring(2, newEntityString.length - 2) + ',')
+            break;
     }
 
     closeContextMenu();
 }
 
-function ctxAddToIgnore()
-{
-    const id = window.ctxTarget.data('id');
-    const entity = window.externallyLoadedModel.entities[id];
+function ctxAddToIgnore(target) {
+    if(target)
+    {
+        const id = window.ctxTarget.data('id');
+        window.ignoredEntityIds.push(id);
+    }
+    else
+    {
+        cy.nodes(':selected').forEach(node => {
+            const id = node.data('id').split('_')[0];
+            if(!window.ignoredEntityIds.includes(id))
+            {
+                window.ignoredEntityIds.push(id);
+            }
+        })
+    }
 
-    window.ignoredEntityIds.push(id);
 
     closeContextMenu();
 }

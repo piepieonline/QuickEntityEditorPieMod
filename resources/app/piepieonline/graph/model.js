@@ -158,5 +158,4 @@ const entitiesToIgnore = [
 ]
 
 const propsToIgnore = [
-    'm_eidParent'
 ]
