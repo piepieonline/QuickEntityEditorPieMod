@@ -1,0 +1,8 @@
+*.*
+/*
+!resources/
+resources/app/*
+!resources/app/piepieonline
+!resources/app/piepieonline**
+!resources/app/editor.*
+resources/app/piepieonline/graph/settings
