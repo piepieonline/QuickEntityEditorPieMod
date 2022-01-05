@@ -43,7 +43,10 @@ PieOuterLayoutElk.prototype.run = function () {
 
     const graph = {
         id: "root",
-        layoutOptions: { 'elk.algorithm': 'layered' },
+        layoutOptions: {
+            'elk.algorithm': 'layered',
+            'elk.edgeRouting': 'POLYLINE'
+        },
         children: children,
         edges: edges
     }

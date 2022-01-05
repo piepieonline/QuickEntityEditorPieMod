@@ -1652,6 +1652,7 @@ function changeView(view) {
 			setTimeout(() => {
 				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedModel = entity;
 				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedReferences = reverseReferences;
+				document.getElementById('pieGraphFrame').contentWindow.externalEditorTree = editorTree;
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
 			}, 1000);
 

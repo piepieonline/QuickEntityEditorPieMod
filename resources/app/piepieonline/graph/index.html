@@ -13,10 +13,12 @@
 
 <body style="background-color: white;">
     <div style="height: 22px;">
+        <button onclick="cy.center('[?isPrimary]')">Recenter</button>
         <input id="entitiesToLoad" type="number" value=500 /> 
         <button onclick="load(window.entityToProcess, parseInt(document.getElementById('entitiesToLoad').value))">Load number of entities</button>
         <button onclick="collapse()">Collapse selected</button>
         <button onclick="expand()">Expand selected</button>
+        <button onclick="selectInTree()">Open selected in tree</button>
     </div>
     <div id="myDiagramDiv" style="width: 100%; height: calc(100vh - 38px);"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>

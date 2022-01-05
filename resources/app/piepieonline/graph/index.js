@@ -1,3 +1,5 @@
+// https://js.cytoscape.org
+
 function load(entityToProcess, MAX_NODE_COUNT = 300) {
     window.entityToProcess = entityToProcess;
 
@@ -198,6 +200,7 @@ function load(entityToProcess, MAX_NODE_COUNT = 300) {
     }).run().on('layoutstop', () => {
         // Force DOM nodes to update
         cy.nodes(':parent').emit('bounds');
+        cy.center('[?isPrimary]');
     })
 
     window.cy = cy;
@@ -215,4 +218,10 @@ function collapse()
 function expand()
 {
     cy.expandCollapse('get').expand(cy.nodes(':selected'));
+}
+
+function selectInTree()
+{
+    externalEditorTree.deselect_all();
+    externalEditorTree.select_node(cy.nodes(':selected')[0].data('id'))
 }

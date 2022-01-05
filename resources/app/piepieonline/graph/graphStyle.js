@@ -15,18 +15,18 @@ const graphStyle = [
         }
     },
     {
-        selector: '[?isPrimary]',
-        css: {
-            'background-color': '#aaa'
-        }
-    },
-    {
         selector: ':parent',
         css: {
             'content': 'data(id)',
             'text-valign': 'top',
             'text-halign': 'center',
             'background-color': '#ddd'
+        }
+    },
+    {
+        selector: '[?isPrimary]',
+        css: {
+            'background-color': '#aaa'
         }
     },
     {
