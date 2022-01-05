@@ -1,8 +1,9 @@
-function load(entityToProcess) {
+function load(entityToProcess, MAX_NODE_COUNT = 300) {
+    window.entityToProcess = entityToProcess;
+
     let parentNodes = [];
     let edgeIDCounter = 0;
     let nodeCounter = 0;
-    const MAX_NODE_COUNT = 500;
     const createNode = (entity) => {
         let id = entity.entityID;
 
@@ -26,6 +27,8 @@ function load(entityToProcess) {
 
         const props = [...Object.entries(entity.properties), ...Object.entries(entity.postInitProperties)];
         for (const [key, prop] of props) {
+            if(propsToIgnore.includes(key)) continue;
+
             function createNodeForProp() {
                 nodes.push(
                     { data: { id: `${id}_${key}`, parent: id, entityInput: true, label: key, x: 0, y: vertOffset++ }, grabbable: false }
@@ -79,7 +82,7 @@ function load(entityToProcess) {
         
         // Prevent too many nodes from existing
         if(nodeCounter > MAX_NODE_COUNT) return { nodes: [], edges: [] };
-        
+
         parentNodes.push(id);
 
         return { nodes, edges };
@@ -163,8 +166,6 @@ function load(entityToProcess) {
     });
 
     cy.on('tapselect', (event) => {
-        console.log(event);
-
         if(event.target.isEdge())
         {
             event.target.source().select();
@@ -184,21 +185,27 @@ function load(entityToProcess) {
         cy.add(edge)
     });
 
+    
     cy.nodes((val) => {
         return !parentNodes.includes(val.data('id'));
     }).layout({
         name: 'pieInnerLayout'
     }).run();
 
-    setTimeout(() => {
-        cy.nodes().layout({
-            name: 'pieOuterLayout',
-            parentNodes
-        }).run();
-    }, 100); // Timeout so the DOM nodes align properly
+    cy.nodes().layout({
+        name: 'pieOuterLayoutElk',
+        parentNodes
+    }).run().on('layoutstop', () => {
+        // Force DOM nodes to update
+        cy.nodes(':parent').emit('bounds');
+    })
 
     window.cy = cy;
 }
+
+const propsToIgnore = [
+    'm_eidParent'
+]
 
 function collapse()
 {

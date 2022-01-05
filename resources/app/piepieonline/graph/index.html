@@ -13,6 +13,8 @@
 
 <body style="background-color: white;">
     <div style="height: 22px;">
+        <input id="entitiesToLoad" type="number" value=500 /> 
+        <button onclick="load(window.entityToProcess, parseInt(document.getElementById('entitiesToLoad').value))">Load number of entities</button>
         <button onclick="collapse()">Collapse selected</button>
         <button onclick="expand()">Expand selected</button>
     </div>
@@ -20,8 +22,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
     <script src="./lib/CytoscapeDomNode.js"></script>
     <script src="./lib/cytoscape-expand-collapse.js"></script>
+    <script src="./lib/elk.bundled.js"></script>
+    <script src="./lib/cytoscape-elk.js"></script>
     <script src="./graphStyle.js"></script>
     <script src="./templateHelpers.js"></script>
+    <script src="./outerLayoutElk.js"></script>
     <script src="./outerLayout.js"></script>
     <script src="./innerLayout.js"></script>
     <script src="./index.js"></script>
