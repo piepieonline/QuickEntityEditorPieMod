@@ -66,9 +66,12 @@ const graphStyle = [
     {
         selector: 'edge',
         css: {
-            'curve-style': 'taxi',
-            'taxi-direction': 'rightward',
-            'target-arrow-shape': 'triangle'
+            'curve-style': 'segments',
+            "segment-weights": '0.5',
+            'segment-distances': '0',
+            'edge-distances': 'node-position',
+            'source-endpoint': '90deg',
+            'target-endpoint': '270deg'
         }
     }
 ]

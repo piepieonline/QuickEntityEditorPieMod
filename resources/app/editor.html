@@ -69,16 +69,16 @@
 					<i class="fas fa-wrench col-span-1"></i>
 					<span class="col-span-7">Overrides</span>
 				</div>
+				<div class="p-4 my-1 bg-gray-700 cursor-pointer grid grid-cols-8 gap-2 items-center" @keyup.window.prevent.ctrl.4="selectedView = 'graph'; changeView('graph')" @click="selectedView = 'graph'; changeView('graph')" id="graphTab">
+					<i class="fas fa-project-diagram col-span-1"></i>
+					<span class="col-span-7">Graph View</span>
+				</div>
 				<div class="p-4 my-1 bg-black cursor-pointer grid grid-cols-8 gap-2 items-center" @keyup.window.prevent.ctrl.3="selectedView = 'tree'; changeView('tree')" @click="selectedView = 'tree'; changeView('tree')" id="treeTab"
 																									@keyup.window.prevent.ctrl.page-up="editorTree.close_all()" @keyup.window.prevent.ctrl.page-down="editorTree.open_all()"
 																									@keyup.window.prevent.alt.arrow-left="back()"
 																									@keyup.window.prevent.ctrl.b="switchEditMode()">
 					<i class="far fa-folder col-span-1"></i>
 					<span class="col-span-7">Tree View</span>
-				</div>
-				<div class="p-4 my-1 bg-gray-700 cursor-pointer grid grid-cols-8 gap-2 items-center" @keyup.window.prevent.ctrl.4="selectedView = 'graph'; changeView('graph')" @click="selectedView = 'graph'; changeView('graph')" id="graphTab">
-					<i class="fas fa-project-diagram col-span-1"></i>
-					<span class="col-span-7">Graph View</span>
 				</div>
 				<div class="p-4 my-1 bg-gray-700 cursor-pointer grid grid-cols-8 gap-2 items-center" @keyup.window.prevent.ctrl.4="selectedView = 'pieGraph'; changeView('pieGraph')" @click="selectedView = 'pieGraph'; changeView('pieGraph')" id="pieGraphTab">
 					<i class="fas fa-project-diagram col-span-1"></i>

@@ -1,5 +1,6 @@
 function convertTemplate(entity) {
     const typeMapping = {
+        'fakeTemplateType_Scene': 'scene',
         'fakeTemplateType_Action': 'action',
         'fakeTemplateType_SetPiece': 'setpiece',
         '000C288A323918F9': 'dramasituationproxy',
@@ -14,14 +15,16 @@ function convertTemplate(entity) {
         '[modules:/zitemrepositorykeyentity.class].pc_entitytype': 'itemrepository'
     };
 
-    function replaceTemplateName(templateIn, entityName) {
-        if (templateIn.indexOf("actor/acts") > -1 || entityName.indexOf("Act_") == 0) return "fakeTemplateType_Action";
+    function replaceTemplateName(entity) {
+        if (entity.template.indexOf("actor/acts") > -1 || entity.name.indexOf("Act_") == 0) return "fakeTemplateType_Action";
 
-        if (templateIn.indexOf("setpieces_activators.template") > -1 || entityName.indexOf("SetPiece_Activator") == 0) return "fakeTemplateType_SetPiece";
+        if (entity.template.indexOf("setpieces_activators.template") > -1 || entity.name.indexOf("SetPiece_Activator") == 0) return "fakeTemplateType_SetPiece";
 
-        return templateIn;
+        if (entity.entityID === 'fffffffffffffffe' || entity.name === 'Scene') return "fakeTemplateType_Scene";
+
+        return entity.template;
     }
 
-    return typeMapping[replaceTemplateName(entity.template, entity.name)] || 'Unknown Type';
+    return typeMapping[replaceTemplateName(entity)] || 'Unknown Type';
 }
 

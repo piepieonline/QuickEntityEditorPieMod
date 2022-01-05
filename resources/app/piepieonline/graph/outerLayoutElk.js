@@ -52,7 +52,6 @@ PieOuterLayoutElk.prototype.run = function () {
     }
 
     new ELK().layout(graph).then(graph => {
-        console.log(graph);
         graph.children.forEach(node => {
             basePositions[node.id] = { x: node.x, y: node.y }
         });
