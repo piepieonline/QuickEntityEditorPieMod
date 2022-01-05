@@ -1,0 +1,30 @@
+<html>
+
+<head>
+    <style>
+        .node-body {
+            display: inline-flex !important;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body style="background-color: white;">
+    <div style="height: 22px;">
+        <button onclick="collapse()">Collapse selected</button>
+        <button onclick="expand()">Expand selected</button>
+    </div>
+    <div id="myDiagramDiv" style="width: 100%; height: calc(100vh - 38px);"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
+    <script src="./lib/CytoscapeDomNode.js"></script>
+    <script src="./lib/cytoscape-expand-collapse.js"></script>
+    <script src="./graphStyle.js"></script>
+    <script src="./templateHelpers.js"></script>
+    <script src="./outerLayout.js"></script>
+    <script src="./innerLayout.js"></script>
+    <script src="./index.js"></script>
+</body>
+
+</html>

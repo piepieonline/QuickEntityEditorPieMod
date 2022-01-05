@@ -1,0 +1,77 @@
+{
+    "class": "go.GraphLinksModel",
+    "nodeCategoryProperty": "type",
+    "linkFromPortIdProperty": "fromID",
+    "linkToPortIdProperty": "toID",
+    "nodeDataArray": [
+        {
+            "key": 1,
+            "type": "npc",
+            "name": "CHAR_Golden_Civilian_Guest_Traditional_M_PRO176601"
+        },
+        {
+            "key": 2,
+            "type": "role",
+            "name": "Male NPC"
+        },
+        {
+            "key": 3,
+            "type": "dramasituation",
+            "name": "Civilian Garden Idle"
+        },
+        {
+            "key": 4,
+            "type": "dramasituationproxy",
+            "name": "DramaSituation2Proxy"
+        },
+        {
+            "key": 5,
+            "type": "action",
+            "name": "Act_MR_Sit_Phone_Text_Lean_Forward"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": 1,
+            "to": 2,
+            "fromID": "EntityID_Out",
+            "toID": "m_rActorProvider_In",
+            "color": "black"
+        },
+        {
+            "from": 2,
+            "to": 3,
+            "fromID": "EntityID_Out",
+            "toID": "m_aRoles_In",
+            "color": "black"
+        },
+        {
+            "from": 2,
+            "fromID": "EntityID_Out",
+            "to": 5,
+            "toID": "m_pActor_In",
+            "color": "black"
+        },
+        {
+            "from": 4,
+            "fromID": "OnStart_Start_Out",
+            "to": 5,
+            "toID": "Event_In",
+            "color": "gray"
+        },
+        {
+            "from": 3,
+            "fromID": "EntityID_Out",
+            "to": 4,
+            "toID": "m_rOriginalDrama_In",
+            "color": "black"
+        },
+        {
+            "from": 5,
+            "fromID": "OnActTimeout_Done_Out",
+            "to": 4,
+            "toID": "Event_In",
+            "color": "gray"
+        }
+    ]
+}

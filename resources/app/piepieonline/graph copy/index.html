@@ -1,0 +1,30 @@
+<html>
+
+<head>
+</head>
+
+<body style="background-color: white;">
+    <div style="height: 22px;">
+        <label for="levelSelect">Level:</label>
+        <select name="levelSelect" id="levelSelect" onchange="window.level = this.value">
+            <option value="">SELECT</option>
+            <option value="Dubai">Dubai</option>
+            <option value="Paris_Mod">Paris</option>
+        </select>
+        <input type="text" value="" id="idTextbox" />
+        <button onclick="load(document.getElementById('idTextbox').value)">Load</button>
+        <input type="text" value="" id="newNodeType" />
+        <button onclick="addNode(document.getElementById('newNodeType').value)">Add node</button>
+        <button onclick="save()">Save</button>
+        <button onclick="location.reload()">Reload</button>
+    </div>
+    <div id="myDiagramDiv" style="width: 100%; height: calc(100vh - 38px);"></div>
+    <script src="https://unpkg.com/gojs@2.1/release/go-debug.js"></script>
+    <script src="./templates.js"></script>
+    <script src="./modelFromTemplate.js"></script>
+    <script src="./templateFromModel.js"></script>
+    <script src="./index.js"></script>
+    <a id="downloadAnchorElem" style="display: none;">Download</a>
+</body>
+
+</html>
