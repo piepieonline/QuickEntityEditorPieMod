@@ -2,29 +2,62 @@ function convertTemplate(entity) {
     const typeMapping = {
         'fakeTemplateType_Scene': 'scene',
         'fakeTemplateType_Action': 'action',
-        'fakeTemplateType_SetPiece': 'setpiece',
-        '000C288A323918F9': 'dramasituationproxy',
-        '[assembly:/_pro/design/actor/spsystem.template?/screenplay.entitytemplate].pc_entitytype': 'screenplay',
-        '005B2A6454B76874': 'dramasituation',
-        '[assembly:/_pro/design/actor/spsystem.template?/dramasituation.entitytemplate].pc_entitytype': 'dramasituation_old',
-        '00808A03B82188F7': 'role',
-        '[assembly:/_pro/design/actor/spsystem.template?/role.entitytemplate].pc_entitytype': 'role_old',
         '[assembly:/templates/gameplay/ai2/actors.template?/npcactor.entitytemplate].pc_entitytype': 'npc',
         '[modules:/zactorproviderapproach.class].pc_entitytype': 'actorproviderwaypoint',
-        '[assembly:/_pro/design/actor/spsystem.template?/actoroneliner.entitytemplate].pc_entitytype': 'speech_oneliner',
-        '[modules:/zitemrepositorykeyentity.class].pc_entitytype': 'itemrepository'
+        '[modules:/zitemrepositorykeyentity.class].pc_entitytype': 'itemrepository',
+        '[modules:/zinvertedcondition.class].pc_entitytype': 'invertedcondition'
     };
 
+    // TODO: Sort these on likelyhood?
+    const matchers = [
+        { matcher: /spsystem.template\?\/(.*).entitytemplate/, label: ' (Screenplay)', isLegacy: true },
+        { matcher: /keywordkeys.template\?\/(.*).entitytemplate/, label: '' },
+        { matcher: /logic.*\.template\?\/(.*).entitytemplate/, label: ' (Logic)' },
+        { matcher: /setpieces_activators.template\?\/(.*).entitytemplate/, label: ' (Set Piece)' },
+        { matcher: /actor\/acts.*template\?\/(.*).entitytemplate/, label: ' (Action)' },
+    ]
+
+    let hasReplaced = false;
+
     function replaceTemplateName(entity) {
-        if (entity.template.indexOf("actor/acts") > -1 || entity.name.indexOf("Act_") == 0) return "fakeTemplateType_Action";
-
-        if (entity.template.indexOf("setpieces_activators.template") > -1 || entity.name.indexOf("SetPiece_Activator") == 0) return "fakeTemplateType_SetPiece";
-
         if (entity.entityID === 'fffffffffffffffe' || entity.name === 'Scene') return "fakeTemplateType_Scene";
+
+        if((templateFromHashList = hashList[`${entity.template}.TEMP`]) && templateFromHashList) {
+            if(templateFromHashList.indexOf('[') === -1) {
+                hasReplaced = true;
+            }
+
+            return templateFromHashList;
+        }
 
         return entity.template;
     }
 
-    return typeMapping[replaceTemplateName(entity)] || 'Unknown Type';
+    let replacedTemplate = replaceTemplateName(entity)
+    let isLegacy = false;
+
+    let match;
+    if (typeMapping[replacedTemplate]) {
+        isLegacy = typeMapping[replacedTemplate].legacy;
+        replacedTemplate = typeMapping[replacedTemplate].displayName || typeMapping[replacedTemplate];
+        hasReplaced = true;
+    }
+    else {
+        for (let matcher of matchers)
+        {
+            if ((match = entity.template.match(matcher.matcher)) && match) {
+                replacedTemplate = `${match[1]}${matcher.label}`;
+                isLegacy = matcher.isLegacy;
+                hasReplaced = true;
+                break;
+            }
+        }
+    }
+
+    return {
+        entityTemplate: hasReplaced ? replacedTemplate : 'Unknown Template',
+        isLegacy
+    }
+
 }
 

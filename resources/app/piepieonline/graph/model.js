@@ -5,15 +5,15 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
     const createNode = (entity) => {
         const id = entity.entityID;
 
-        const entityTemplate = convertTemplate(entity);
+        const { entityTemplate, isLegacy } = convertTemplate(entity);
 
         const div = document.createElement("div");
-        div.innerHTML = `<div style="margin-top: 20px">${entity.name}</div><div style="margin-bottom: 20px">${convertTemplate(entity)}</div>`;
+        div.innerHTML = `<div style="margin-top: 20px">${entity.name}</div><div style="margin-bottom: 20px">${entityTemplate}</div>`;
         div.classList = ['node-body'];
 
         const nodes = [
-            { data: { id, isPrimary: entityToProcess === id, dom: div } },
-            { data: { id: `${id}_name`, parent: id, entityName: true, label: entity.name, x: 1, y: 0 }, grabbable: false }
+            { data: { id, isPrimary: entityToProcess === id, isLegacy, dom: div } },
+            { data: { id: `${id}_name`, parent: id, entityName: true, x: 1, y: 0 }, grabbable: false }
         ];
 
         const edges = [];
@@ -35,21 +35,21 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
                 )
             }
 
-            function createEdgeForProp(otherId) {
+            function createEdgeForProp(otherId, label) {
                 edges.push(
-                    { data: { id: `${otherId}_output >> ${id}_${key} (${edgeIDCounter++})`, source: `${otherId}_output`, target: `${id}_${key}` } }
+                    { data: { id: `${otherId}_output >> ${id}_${key} (${edgeIDCounter++})`, source: `${otherId}_output`, target: `${id}_${key}`, label } }
                 )
             }
 
             if (prop.type === 'SEntityTemplateReference') {
                 createNodeForProp();
-                createEdgeForProp(prop.value);
+                createEdgeForProp(prop.value.ref || prop.value, prop.value.exposedEntity || undefined);
             }
             else if (prop.type === 'TArray<SEntityTemplateReference>') {
                 createNodeForProp();
                 prop.value.forEach(other => {
                     // Other could be an ID, or an external reference
-                    createEdgeForProp(other.ref || other);
+                    createEdgeForProp(other.ref || other, other.exposedEntity || undefined);
                 })
             }
         }
@@ -69,13 +69,13 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             }
 
             edges.push(
-                { data: { id: `${eventID} >> ${event.onEntity}_input (${edgeIDCounter++})`, source: eventID, target: `${event.onEntity}_input` } }
+                { data: { id: `${eventID} >> ${event.onEntity}_input (${edgeIDCounter++})`, source: eventID, target: `${event.onEntity}_input`, label: event.shouldTrigger } }
             );
         })
 
         maxVert = Math.max(maxVert, vertOffset);
 
-        nodes.push({ data: { id: `${id}_type`, parent: id, entityType: true, label: entityTemplate, x: 1, y: maxVert }, grabbable: false });
+        nodes.push({ data: { id: `${id}_type`, parent: id, entityType: true, x: 1, y: maxVert }, grabbable: false });
 
         parentNodes.push(id);
 
@@ -103,7 +103,7 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             if (
                 !parentNodes.includes(id) &&
                 !nodesToProcess.includes(id) &&
-                !entitiesToIgnore.includes(convertTemplate(window.externallyLoadedModel.entities[id])) &&
+                !entitiesToIgnore.includes(convertTemplate(window.externallyLoadedModel.entities[id]).entityTemplate) &&
                 !ignoredEntityIds.includes(id)
             ) nodesToProcess.push(id);
         }

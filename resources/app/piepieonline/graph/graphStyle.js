@@ -24,9 +24,21 @@ const graphStyle = [
         }
     },
     {
+        selector: '[?isLegacy]',
+        css: {
+            'background-color': '#fbb295'
+        }
+    },
+    {
         selector: '[?isPrimary]',
         css: {
-            'background-color': '#aaa'
+            'background-color': '#adb1c6'
+        }
+    },
+    {
+        selector: '[?isLegacy][?isPrimary]',
+        css: {
+            'background-color': '#f49169'
         }
     },
     {
@@ -72,6 +84,12 @@ const graphStyle = [
             'edge-distances': 'node-position',
             'source-endpoint': '90deg',
             'target-endpoint': '270deg'
+        }
+    },
+    {
+        selector: '[label]:selected',
+        css: {
+            'content': 'data(label)'
         }
     }
 ]
