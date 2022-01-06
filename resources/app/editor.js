@@ -28,7 +28,7 @@ const chroma = require("chroma-js")
 const ExpectedQuickEntityVersion = 2.1
 
 const defaultRPKGLoadPath = 'G:\\EpicGames\\HITMAN3\\Runtime';
-const defaultEntitySavePath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\Mods\\AIActionChanger\\content\\chunk27';
+let defaultEntitySavePath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\Mods\\AIActionChanger\\content\\chunk27';
 const SimpleModFrameworkPath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\';
 const RunGamePath = 'G:\\EpicGames\\HITMAN3\\';
 
@@ -1653,6 +1653,7 @@ function changeView(view) {
 				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedModel = entity;
 				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedReferences = reverseReferences;
 				document.getElementById('pieGraphFrame').contentWindow.externalEditorTree = editorTree;
+				document.getElementById('pieGraphFrame').contentWindow.hashList = hashListAsObject;
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
 			}, 1000);
 
@@ -1664,6 +1665,7 @@ function changeView(view) {
 
 			setTimeout(() => {
 				document.getElementById('pie3DViewFrame').contentWindow.externallyLoadedModel = entity;
+				document.getElementById('pie3DViewFrame').contentWindow.hashList = hashListAsObject;
 				document.getElementById('pie3DViewFrame').contentWindow.load(currentlySelected);
 			}, 1000);
 
@@ -1969,6 +1971,8 @@ async function saveEntity(saveAs = false) {
 			defaultPath: defaultEntitySavePath
 		})
 	}
+
+	defaultEntitySavePath = currentlyOpenedEntity;
 
 	let savedEntity = LosslessJSON.stringify(entity)
 	let sizeOfEntity = new TextEncoder().encode(savedEntity).length
