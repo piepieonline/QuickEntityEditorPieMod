@@ -2326,6 +2326,8 @@ function deployMods()
 					output += String(data)
 					fullOutput += String(data)
 
+					console.log(output);
+
 					output = output.split("\n").slice(output.endsWith("\n") ? -2 : -1)[0]
 
 					Swal.getHtmlContainer().querySelector('i').textContent = output.split("\n").slice(output.endsWith("\n") ? -2 : -1)[0]
