@@ -17,7 +17,7 @@ function load(idWithFocus)
     aLight.position.set( 1, 1, 1 ).normalize();
     scene.add( aLight );
 
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas') });
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     document.body.appendChild( renderer.domElement );
@@ -78,7 +78,9 @@ function load(idWithFocus)
             ObjectSelected(objectToSelect);
         }
 
-        const intersects = raycaster.intersectObjects( scene.children, false );
+        const intersects = raycaster.intersectObjects( scene.children, false).filter(hit => hit.object.visible);
+
+
 
         if ( intersects.length > 0 ) {
 
@@ -147,6 +149,9 @@ function load(idWithFocus)
 
     window.addEventListener( 'resize', onWindowResize );
     renderer.domElement.addEventListener( 'mousedown', onMouseDown );
+
+    setVisibleByType('zboxvolumeentity', false);
+    createContextMenuItems(idToMesh, worldObjectsByType);
 
     animate();
 }

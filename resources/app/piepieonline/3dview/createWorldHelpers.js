@@ -1,5 +1,7 @@
 function setObjectPosAndRot(obj, entity, setPosition = true, setRotation = true)
 {
+    if(!entity.properties.m_mTransform) return;
+
     if(setPosition)
     {
         obj.position.x = parseFloat(entity.properties.m_mTransform.value.position.x);
