@@ -30,14 +30,13 @@ function load(idWithFocus)
     const raycaster = new THREE.Raycaster();
     const mouseLocation = new THREE.Vector2();
 
-    const threeMeshList = {};
-    createWorld(scene, threeMeshList);
+    const { idToMesh, worldObjectsByType } = createWorld(scene);
 
-    if(threeMeshList[idWithFocus])
+    if(idToMesh[idWithFocus])
     {
-        camera.position.x = threeMeshList[idWithFocus].position.x;
-        camera.position.y = threeMeshList[idWithFocus].position.y;
-        camera.position.z = threeMeshList[idWithFocus].position.z;
+        camera.position.x = idToMesh[idWithFocus].position.x;
+        camera.position.y = idToMesh[idWithFocus].position.y;
+        camera.position.z = idToMesh[idWithFocus].position.z;
     }
     else
     {
@@ -139,6 +138,11 @@ function load(idWithFocus)
         raycaster.setFromCamera( mouseLocation, camera );
 
         doCastRay = true;
+    }
+
+    window.setVisibleByType = function(type, visible)
+    {
+        for(const obj of worldObjectsByType[type]) obj.visible = visible;
     }
 
     window.addEventListener( 'resize', onWindowResize );

@@ -7,7 +7,8 @@ function convertTemplate(entity) {
         '[modules:/zinvertedcondition.class].pc_entitytype': 'invertedcondition',
         '[modules:/zaimodifieractor.class].pc_entitytype': 'aimodifieractor',
         '[modules:/zitemspawner.class].pc_entitytype': 'itemspawner',
-        '[modules:/zheroitemcondition.class].pc_entitytype': 'heroitemcondition'
+        '[modules:/zheroitemcondition.class].pc_entitytype': 'heroitemcondition',
+        '[modules:/zboxvolumeentity.class].pc_entitytype': 'zboxvolumeentity'
     };
 
     // TODO: Sort these on likelyhood?

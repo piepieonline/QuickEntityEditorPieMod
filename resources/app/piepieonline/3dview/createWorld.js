@@ -1,7 +1,9 @@
-function createWorld(scene, threeMeshList) {
+function createWorld(scene) {
+    const idToMesh = {};
+
     function createWorldObject(entityID, mesh) {
         if (mesh) {
-            threeMeshList[entityID] = mesh;
+            idToMesh[entityID] = mesh;
             mesh.entityID = entityID;
             scene.add(mesh);
         }
@@ -34,7 +36,7 @@ function createWorld(scene, threeMeshList) {
 
     */
 
-
+    const worldObjectsByType = {};
 
     for (const [entityID, entity] of Object.entries(externallyLoadedModel.entities)) {
 
@@ -46,29 +48,43 @@ function createWorld(scene, threeMeshList) {
                 type: entity.template
             };
         }
-            
 
         if (entity.template.indexOf('[assembly:/_pro/environment/templates/kits/') === 0) {
             transformedTemplate = { template: entity.template, type: 'levelkititem' }
         }
 
+        let createdObject;
+
         switch (transformedTemplate.type) {
             case 'npc':
-                createWorldObject(entityID, createNPC(entity));
+                createdObject = createWorldObject(entityID, createNPC(entity));
                 break;
             case 'action':
-                createWorldObject(entityID, createAction(entity));
+                createdObject = createWorldObject(entityID, createAction(entity));
                 break;
             case '[modules:/zcoverplane.class].pc_entitytype':
-                createWorldObject(entityID, createCoverPlane(entity));
+                createdObject = createWorldObject(entityID, createCoverPlane(entity));
                 break;
             case '[assembly:/_pro/design/levelflow.template?/herospawn.entitytemplate].pc_entitytype':
-                createWorldObject(entityID, createPlayerSpawn(entity));
+                createdObject = createWorldObject(entityID, createPlayerSpawn(entity));
                 break;
             case 'levelkititem':
-                createWorldObject(entityID, createLevelKitItem(entity));
+                createdObject = createWorldObject(entityID, createLevelKitItem(entity));
+                break;
+            case 'zboxvolumeentity':
+                createdObject = createWorldObject(entityID, createVolumeBox(entity));
                 break;
         }
 
+        if(createdObject)
+        {
+            if(!worldObjectsByType[transformedTemplate.type]) worldObjectsByType[transformedTemplate.type] = [];
+            worldObjectsByType[transformedTemplate.type].push(createdObject);
+        }
     }
+
+    return {
+        idToMesh,
+        worldObjectsByType
+    };
 }

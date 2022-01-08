@@ -15,12 +15,21 @@ function setObjectPosAndRot(obj, entity, setPosition = true, setRotation = true)
     }
 }
 
+function readH3Position(entityVector)
+{
+    return {
+        x: parseFloat(entityVector.x),
+        y: parseFloat(entityVector.z),
+        z: -parseFloat(entityVector.y)
+    }
+}
+
 function createCylinderMarker(geometryWidth, geometryHeight)
 {
     const geometry = new THREE.CylinderGeometry( geometryWidth, geometryWidth, geometryHeight, 16 );
     geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, geometryHeight / 2, 0) );
 
-    const frontGeometry = new THREE.BoxGeometry( .1, .1, .1, 16 );
+    const frontGeometry = new THREE.BoxGeometry( .1, .1, .1 );
     frontGeometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, geometryHeight / 2, geometryWidth) );
 
     geometry.merge(frontGeometry);
