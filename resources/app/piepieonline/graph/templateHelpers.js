@@ -1,20 +1,22 @@
 function convertTemplate(entity) {
     const typeMapping = {
         'fakeTemplateType_Scene': 'scene',
-        'fakeTemplateType_Action': 'action',
         '[assembly:/templates/gameplay/ai2/actors.template?/npcactor.entitytemplate].pc_entitytype': 'npc',
         '[modules:/zactorproviderapproach.class].pc_entitytype': 'actorproviderwaypoint',
         '[modules:/zitemrepositorykeyentity.class].pc_entitytype': 'itemrepository',
-        '[modules:/zinvertedcondition.class].pc_entitytype': 'invertedcondition'
+        '[modules:/zinvertedcondition.class].pc_entitytype': 'invertedcondition',
+        '[modules:/zaimodifieractor.class].pc_entitytype': 'aimodifieractor',
+        '[modules:/zitemspawner.class].pc_entitytype': 'itemspawner',
+        '[modules:/zheroitemcondition.class].pc_entitytype': 'heroitemcondition'
     };
 
     // TODO: Sort these on likelyhood?
     const matchers = [
-        { matcher: /spsystem.template\?\/(.*).entitytemplate/, label: ' (Screenplay)', isLegacy: true },
-        { matcher: /keywordkeys.template\?\/(.*).entitytemplate/, label: '' },
-        { matcher: /logic.*\.template\?\/(.*).entitytemplate/, label: ' (Logic)' },
-        { matcher: /setpieces_activators.template\?\/(.*).entitytemplate/, label: ' (Set Piece)' },
-        { matcher: /actor\/acts.*template\?\/(.*).entitytemplate/, label: ' (Action)' },
+        { matcher: /actor\/acts.*template\?\/(.*).entitytemplate/, label: ' (Action)', type: 'action' },
+        { matcher: /spsystem.template\?\/(.*).entitytemplate/, label: ' (Screenplay)', type: 'screenplay', isLegacy: true },
+        { matcher: /keywordkeys.template\?\/(.*).entitytemplate/, label: '', type: 'keyword' },
+        { matcher: /logic.*\.template\?\/(.*).entitytemplate/, label: ' (Logic)', type: 'logic' },
+        { matcher: /setpieces_activators.template\?\/(.*).entitytemplate/, label: ' (Set Piece)', type: 'setpiece' },
     ]
 
     let hasReplaced = false;
@@ -35,11 +37,13 @@ function convertTemplate(entity) {
 
     let replacedTemplate = replaceTemplateName(entity)
     let isLegacy = false;
+    let type;
 
     let match;
     if (typeMapping[replacedTemplate]) {
         isLegacy = typeMapping[replacedTemplate].legacy;
         replacedTemplate = typeMapping[replacedTemplate].displayName || typeMapping[replacedTemplate];
+        type = replacedTemplate;
         hasReplaced = true;
     }
     else {
@@ -48,6 +52,7 @@ function convertTemplate(entity) {
             if ((match = entity.template.match(matcher.matcher)) && match) {
                 replacedTemplate = `${match[1]}${matcher.label}`;
                 isLegacy = matcher.isLegacy;
+                type = matcher.type;
                 hasReplaced = true;
                 break;
             }
@@ -56,7 +61,8 @@ function convertTemplate(entity) {
 
     return {
         entityTemplate: hasReplaced ? replacedTemplate : 'Unknown Template',
-        isLegacy
+        isLegacy,
+        type
     }
 
 }

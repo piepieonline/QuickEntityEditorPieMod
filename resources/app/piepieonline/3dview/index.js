@@ -2,8 +2,11 @@ function load(idWithFocus)
 {
     console.log(`init with id: ${idWithFocus}`);
 
+    THREE.Object3D.DefaultUp.set(0, 0, 1);
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color( 'gray' );
+
     const camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     
     const light = new THREE.DirectionalLight( 0xffffff, .2 );
@@ -51,23 +54,65 @@ function load(idWithFocus)
         renderer.render( scene, camera );
     };
     
+    function ObjectSelected(meshObject)
+    {
+        console.log(meshObject);
+        console.log(externallyLoadedModel.entities[meshObject.entityID]);
+    }
+
     let INTERSECTED;
+    let lastSelected = [];
+    let doCastRay = false;
     function findSelectedObject()
     {
+        if(!doCastRay) return; else doCastRay = false;
+
+        function actuallySelectObject(objectToSelect)
+        {
+            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+            INTERSECTED = objectToSelect;
+
+            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+            INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+            ObjectSelected(objectToSelect);
+        }
+
         const intersects = raycaster.intersectObjects( scene.children, false );
 
         if ( intersects.length > 0 ) {
 
             if ( INTERSECTED != intersects[ 0 ].object ) {
+                actuallySelectObject(intersects[ 0 ].object);
 
-                if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-                INTERSECTED = intersects[ 0 ].object;
-                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                INTERSECTED.material.emissive.setHex( 0xff0000 );
-
-                console.log(intersects[0].object)
-                console.log(externallyLoadedModel.entities[intersects[0].object.entityID])
+                lastSelected = [ intersects[ 0 ].object ];
+            } 
+            else
+            {
+                let highestIndex = -1;
+                for (let intersect of intersects)
+                {
+                    const eleIndex = lastSelected.indexOf(intersect.object);
+                    if(eleIndex === -1)
+                    {
+                        lastSelected.splice(0, 0, intersect.object);
+                        highestIndex = 0;
+                        break;
+                    }
+                    else
+                    {
+                        highestIndex = Math.max(eleIndex, highestIndex);
+                    }
+                }
+                if(highestIndex >= 0)
+                {
+                    // if(INTERSECTED != lastSelected[highestIndex])
+                    {
+                        lastSelected.splice(0, 0, lastSelected.splice(highestIndex, 1)[0]);
+                        actuallySelectObject(lastSelected[0]);
+                    }
+                }
             }
 
         } else {
@@ -92,6 +137,8 @@ function load(idWithFocus)
         mouseLocation.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
         raycaster.setFromCamera( mouseLocation, camera );
+
+        doCastRay = true;
     }
 
     window.addEventListener( 'resize', onWindowResize );

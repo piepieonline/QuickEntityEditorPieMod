@@ -43,7 +43,8 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 
             if (prop.type === 'SEntityTemplateReference') {
                 createNodeForProp();
-                createEdgeForProp(prop.value.ref || prop.value, prop.value.exposedEntity || undefined);
+                if(prop.value !== null)
+                    createEdgeForProp(prop.value.ref || prop.value, prop.value.exposedEntity || undefined);
             }
             else if (prop.type === 'TArray<SEntityTemplateReference>') {
                 createNodeForProp();

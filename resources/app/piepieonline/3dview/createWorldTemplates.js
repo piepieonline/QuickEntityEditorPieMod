@@ -1,7 +1,21 @@
 function createNPC(entity)
 {
-    const geometry = new THREE.CylinderGeometry( .35, .35, .1, 16 );
-    const material = new THREE.MeshLambertMaterial( {color: 0x8dff45} );
+    const geometry = createCylinderMarker(.35, 1.8);
+
+    const material = new THREE.MeshLambertMaterial( {color: 0x8dff45 } );
+
+    const meshObj = new THREE.Mesh( geometry, material );
+
+    setObjectPosAndRot(meshObj, entity);
+
+    return meshObj;
+}
+
+function createAction(entity)
+{
+    const geometry = createCylinderMarker(.4, .1);
+
+    const material = new THREE.MeshLambertMaterial( {color: 0xacf2e9 } );
 
     const meshObj = new THREE.Mesh( geometry, material );
 
@@ -12,8 +26,9 @@ function createNPC(entity)
 
 function createPlayerSpawn(entity)
 {
-    const geometry = new THREE.CylinderGeometry( .35, .35, .1, 16 );
-    const material = new THREE.MeshLambertMaterial( {color: 0xfcff45} );
+    const geometry = createCylinderMarker(.35, .1);
+
+    const material = new THREE.MeshLambertMaterial( {color: 0xfcff45 } );
 
     const meshObj = new THREE.Mesh( geometry, material );
 
@@ -30,6 +45,8 @@ function createCoverPlane(entity)
         return false;
 
     const geometry = new THREE.PlaneGeometry( coverSize, 1 );
+    geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, .5, 0) );
+
     const material = new THREE.MeshLambertMaterial( {color: 0xfffdbe, side: THREE.DoubleSide} );
 
     const meshObj = new THREE.Mesh( geometry, material );

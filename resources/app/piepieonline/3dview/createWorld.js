@@ -38,15 +38,26 @@ function createWorld(scene, threeMeshList) {
 
     for (const [entityID, entity] of Object.entries(externallyLoadedModel.entities)) {
 
-        let transformedTemplate = entity.template;
+        let transformedTemplate = convertTemplate(entity);
+
+        if(transformedTemplate.entityTemplate === 'Unknown Template') {
+            transformedTemplate = {
+                entityTemplate: entity.template,
+                type: entity.template
+            };
+        }
+            
 
         if (entity.template.indexOf('[assembly:/_pro/environment/templates/kits/') === 0) {
-            transformedTemplate = 'levelkititem'
+            transformedTemplate = { template: entity.template, type: 'levelkititem' }
         }
 
-        switch (transformedTemplate) {
-            case '[assembly:/templates/gameplay/ai2/actors.template?/npcactor.entitytemplate].pc_entitytype':
+        switch (transformedTemplate.type) {
+            case 'npc':
                 createWorldObject(entityID, createNPC(entity));
+                break;
+            case 'action':
+                createWorldObject(entityID, createAction(entity));
                 break;
             case '[modules:/zcoverplane.class].pc_entitytype':
                 createWorldObject(entityID, createCoverPlane(entity));

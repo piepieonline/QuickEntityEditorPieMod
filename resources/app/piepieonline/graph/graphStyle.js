@@ -45,8 +45,6 @@ const graphStyle = [
         selector: '[entityName]',
         css: {
             'content': '',
-            'text-valign': 'top',
-            'text-halign': 'right',
             'background-opacity': 0
         }
     },
@@ -54,8 +52,6 @@ const graphStyle = [
         selector: '[entityType]',
         css: {
             'content': '',
-            'text-valign': 'bottom',
-            'text-halign': 'right',
             'background-opacity': 0
         }
     },
