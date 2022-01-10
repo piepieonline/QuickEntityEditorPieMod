@@ -24,6 +24,8 @@ function createContextMenuItems(idToMesh, worldObjectsByType)
 {
     const currentValues = {};
 
+    ctxMenu.innerHTML = '';
+
     for (let type of Object.keys(worldObjectsByType))
     {
         currentValues[type] = worldObjectsByType[type][0].visible;

@@ -8,16 +8,19 @@ function convertTemplate(entity) {
         '[modules:/zaimodifieractor.class].pc_entitytype': 'aimodifieractor',
         '[modules:/zitemspawner.class].pc_entitytype': 'itemspawner',
         '[modules:/zheroitemcondition.class].pc_entitytype': 'heroitemcondition',
-        '[modules:/zboxvolumeentity.class].pc_entitytype': 'zboxvolumeentity'
+        '[modules:/zboxvolumeentity.class].pc_entitytype': 'boxvolumeentity',
+        '[modules:/zspatialentity.class].pc_entitytype': 'spatialentity'
     };
 
     // TODO: Sort these on likelyhood?
-    const matchers = [
-        { matcher: /actor\/acts.*template\?\/(.*).entitytemplate/, label: ' (Action)', type: 'action' },
-        { matcher: /spsystem.template\?\/(.*).entitytemplate/, label: ' (Screenplay)', type: 'screenplay', isLegacy: true },
-        { matcher: /keywordkeys.template\?\/(.*).entitytemplate/, label: '', type: 'keyword' },
-        { matcher: /logic.*\.template\?\/(.*).entitytemplate/, label: ' (Logic)', type: 'logic' },
-        { matcher: /setpieces_activators.template\?\/(.*).entitytemplate/, label: ' (Set Piece)', type: 'setpiece' },
+    const templateMatchers = [
+        { templateMatcher: /(s\d+_|^)act_/, label: ' (Action)', type: 'action' },
+        { templateMatcher: /actor\/acts.*template\?\/(.*).entitytemplate/, label: ' (Action)', type: 'action' },
+        { templateMatcher: /spsystem.template\?\/(.*).entitytemplate/, label: ' (Screenplay)', type: 'screenplay', isLegacy: true },
+        { templateMatcher: /keywordkeys.template\?\/(.*).entitytemplate/, label: '', type: 'keyword' },
+        { templateMatcher: /logic.*\.template\?\/(.*).entitytemplate/, label: ' (Logic)', type: 'logic' },
+        { templateMatcher: /design\/setpieces.*\?\/(.*).entitytemplate/, label: ' (Set Piece)', type: 'setpiece' },
+        { templateMatcher: /setpieces_activators.template\?\/(.*).entitytemplate/, label: ' (Set Piece Activator)', type: 'setpieceactivator' },
     ]
 
     let hasReplaced = false;
@@ -26,10 +29,6 @@ function convertTemplate(entity) {
         if (entity.entityID === 'fffffffffffffffe' || entity.name === 'Scene') return "fakeTemplateType_Scene";
 
         if((templateFromHashList = hashList[`${entity.template}.TEMP`]) && templateFromHashList) {
-            if(templateFromHashList.indexOf('[') === -1) {
-                hasReplaced = true;
-            }
-
             return templateFromHashList;
         }
 
@@ -48,14 +47,17 @@ function convertTemplate(entity) {
         hasReplaced = true;
     }
     else {
-        for (let matcher of matchers)
+        for (let matcher of templateMatchers)
         {
-            if ((match = entity.template.match(matcher.matcher)) && match) {
-                replacedTemplate = `${match[1]}${matcher.label}`;
-                isLegacy = matcher.isLegacy;
-                type = matcher.type;
-                hasReplaced = true;
-                break;
+            if(matcher.templateMatcher)
+            {
+                if ((match = replacedTemplate.match(matcher.templateMatcher)) && match) {
+                    replacedTemplate = `${match[1]}${matcher.label}`;
+                    isLegacy = matcher.isLegacy;
+                    type = matcher.type;
+                    hasReplaced = true;
+                    break;
+                }
             }
         }
     }

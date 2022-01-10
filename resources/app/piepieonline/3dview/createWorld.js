@@ -39,14 +39,18 @@ function createWorld(scene) {
     const worldObjectsByType = {};
 
     for (const [entityID, entity] of Object.entries(externallyLoadedModel.entities)) {
-
         let transformedTemplate = convertTemplate(entity);
 
-        if(transformedTemplate.entityTemplate === 'Unknown Template') {
+        if (transformedTemplate.entityTemplate === 'Unknown Template') {
             transformedTemplate = {
                 entityTemplate: entity.template,
                 type: entity.template
             };
+        }
+
+        if(entityID === '710845eac3f6aa0c')
+        {
+            console.log('debug');
         }
 
         if (entity.template.indexOf('[assembly:/_pro/environment/templates/kits/') === 0) {
@@ -71,14 +75,23 @@ function createWorld(scene) {
             case 'levelkititem':
                 createdObject = createWorldObject(entityID, createLevelKitItem(entity));
                 break;
-            case 'zboxvolumeentity':
+            case 'boxvolumeentity':
                 createdObject = createWorldObject(entityID, createVolumeBox(entity));
+                break;
+            case 'spatialentity':
+                createdObject = createWorldObject(entityID, createSmallGizmo(entity, 0xfffdbe));
+                break;
+            case 'itemspawner':
+                createdObject = createWorldObject(entityID, createSmallGizmo(entity, 0x8cfaa2));
+                break;
+            case 'setpiece':
+            case 'setpieceactivator':
+                createdObject = createWorldObject(entityID, createSmallGizmo(entity, 0xb88db3, true));
                 break;
         }
 
-        if(createdObject)
-        {
-            if(!worldObjectsByType[transformedTemplate.type]) worldObjectsByType[transformedTemplate.type] = [];
+        if (createdObject) {
+            if (!worldObjectsByType[transformedTemplate.type]) worldObjectsByType[transformedTemplate.type] = [];
             worldObjectsByType[transformedTemplate.type].push(createdObject);
         }
     }

@@ -1,6 +1,25 @@
-function load(idWithFocus)
+async function load(idWithFocus)
 {
     console.log(`init with id: ${idWithFocus}`);
+
+    console.log(externallyLoadedModel.externalScenes)
+
+    window.externalScenes = {};
+
+    for(let sceneRef of externallyLoadedModel.externalScenes)
+    {
+        const sceneHash = h3Hash(sceneRef);
+        
+        try 
+        {
+            await fetch(`./extractedParents/${sceneHash}.json`).then(res => res.ok ? res.json() : null).then(jsonData => {
+                if(jsonData)
+                {
+                    window.externalScenes[sceneHash] = jsonData;
+                }
+            })
+        } catch {}
+    }
 
     THREE.Object3D.DefaultUp.set(0, 0, 1);
 
@@ -80,11 +99,9 @@ function load(idWithFocus)
 
         const intersects = raycaster.intersectObjects( scene.children, false).filter(hit => hit.object.visible);
 
-
-
         if ( intersects.length > 0 ) {
 
-            if ( INTERSECTED != intersects[ 0 ].object ) {
+            if ( intersects.length === 1 && INTERSECTED != intersects[ 0 ].object ) {
                 actuallySelectObject(intersects[ 0 ].object);
 
                 lastSelected = [ intersects[ 0 ].object ];
@@ -144,13 +161,15 @@ function load(idWithFocus)
 
     window.setVisibleByType = function(type, visible)
     {
+        if(!worldObjectsByType[type]) return;
+
         for(const obj of worldObjectsByType[type]) obj.visible = visible;
     }
 
     window.addEventListener( 'resize', onWindowResize );
-    renderer.domElement.addEventListener( 'mousedown', onMouseDown );
+    renderer.domElement.addEventListener( 'click', onMouseDown );
 
-    setVisibleByType('zboxvolumeentity', false);
+    setVisibleByType('boxvolumeentity', false);
     createContextMenuItems(idToMesh, worldObjectsByType);
 
     animate();

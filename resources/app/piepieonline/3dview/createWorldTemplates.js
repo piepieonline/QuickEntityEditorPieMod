@@ -91,12 +91,34 @@ function createVolumeBox(entity)
 {
     if(!(entity?.properties?.m_vGlobalSize?.value)) return false;
     
-    const boxSize = readH3Position(entity.properties.m_vGlobalSize.value);
+    const boxSize = readH3Vector(entity.properties.m_vGlobalSize.value, null);
 
     const geometry = new THREE.BoxGeometry( boxSize.x, boxSize.y, boxSize.z );
     geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, boxSize.y / 2, 0) );
 
     const material = new THREE.MeshLambertMaterial( { color: 0xfffdbe, wireframe: true } );
+
+    const meshObj = new THREE.Mesh( geometry, material );
+
+    setObjectPosAndRot(meshObj, entity);
+
+    return meshObj;
+}
+
+function createSmallGizmo(entity, color, addForwardMarker)
+{
+    const geometry = new THREE.SphereGeometry( .1 );
+    geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, .05, 0) );
+
+    if(addForwardMarker)
+    {
+        const frontGeometry = new THREE.BoxGeometry( .05, .05, .05 );
+        frontGeometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, .05, .1) );
+    
+        geometry.merge(frontGeometry);
+    }
+
+    const material = new THREE.MeshLambertMaterial( { color, wireframe: true } );
 
     const meshObj = new THREE.Mesh( geometry, material );
 

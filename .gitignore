@@ -5,3 +5,4 @@ resources/app/*
 !resources/app/piepieonline
 !resources/app/piepieonline**
 !resources/app/editor.*
+resources/app/piepieonline/3dview/extractedParents/*
