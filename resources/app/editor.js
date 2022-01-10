@@ -1659,9 +1659,9 @@ function changeView(view) {
 
 			break;
 		case "pie3DView":
-			if(currentView === view) {
+			//if(currentView === view) {
 				document.getElementById('pie3DViewFrame').contentWindow.location.reload();
-			}
+			// }
 
 			setTimeout(() => {
 				document.getElementById('pie3DViewFrame').contentWindow.externallyLoadedModel = entity;

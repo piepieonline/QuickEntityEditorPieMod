@@ -88,6 +88,9 @@ function createWorld(scene) {
             case 'setpieceactivator':
                 createdObject = createWorldObject(entityID, createSmallGizmo(entity, 0xb88db3, true));
                 break;
+            case 'prop':
+                createdObject = createWorldObject(entityID, createProp(entity));
+                break;
         }
 
         if (createdObject) {

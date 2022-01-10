@@ -37,6 +37,21 @@ function createPlayerSpawn(entity)
     return meshObj;
 }
 
+function createProp(entity)
+{
+    const geometry = createCylinderMarker(.15, .15);
+
+    const material = new THREE.MeshLambertMaterial( {color: 0xaaaaaa } );
+
+    const meshObj = new THREE.Mesh( geometry, material );
+
+    setObjectPosAndRot(meshObj, entity);
+
+    meshObj.visible = false;
+
+    return meshObj;
+}
+
 function createCoverPlane(entity)
 {
     let coverSize = parseFloat(entity?.properties?.m_fCoverLength?.value);
@@ -101,6 +116,8 @@ function createVolumeBox(entity)
     const meshObj = new THREE.Mesh( geometry, material );
 
     setObjectPosAndRot(meshObj, entity);
+
+    meshObj.visible = false;
 
     return meshObj;
 }

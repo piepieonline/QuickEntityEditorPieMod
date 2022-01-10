@@ -9,7 +9,8 @@ function convertTemplate(entity) {
         '[modules:/zitemspawner.class].pc_entitytype': 'itemspawner',
         '[modules:/zheroitemcondition.class].pc_entitytype': 'heroitemcondition',
         '[modules:/zboxvolumeentity.class].pc_entitytype': 'boxvolumeentity',
-        '[modules:/zspatialentity.class].pc_entitytype': 'spatialentity'
+        '[modules:/zspatialentity.class].pc_entitytype': 'spatialentity',
+        'role': 'role'
     };
 
     // TODO: Sort these on likelyhood?
@@ -21,6 +22,7 @@ function convertTemplate(entity) {
         { templateMatcher: /logic.*\.template\?\/(.*).entitytemplate/, label: ' (Logic)', type: 'logic' },
         { templateMatcher: /design\/setpieces.*\?\/(.*).entitytemplate/, label: ' (Set Piece)', type: 'setpiece' },
         { templateMatcher: /setpieces_activators.template\?\/(.*).entitytemplate/, label: ' (Set Piece Activator)', type: 'setpieceactivator' },
+        { templateMatcher: /\/environment\/templates\/props.*\?\/(.*).entitytemplate/, label: ' (Prop)', type: 'prop' },
     ]
 
     let hasReplaced = false;

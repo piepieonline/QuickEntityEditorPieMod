@@ -169,7 +169,6 @@ async function load(idWithFocus)
     window.addEventListener( 'resize', onWindowResize );
     renderer.domElement.addEventListener( 'click', onMouseDown );
 
-    setVisibleByType('boxvolumeentity', false);
     createContextMenuItems(idToMesh, worldObjectsByType);
 
     animate();
