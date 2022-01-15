@@ -1,5 +1,6 @@
 function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 {
+    const loggerRequestedNodes = [];
     let parentNodes = [];
     let edgeIDCounter = 0;
     const createNode = (entity) => {
@@ -67,6 +68,8 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
                     { data: { id: `${id}_${event.onEvent}`, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++ }, grabbable: false }
                 )
                 includedEvents.push(eventID);
+
+                loggerRequestedNodes.push(`${id}_${event.onEvent}`);
             }
 
             edges.push(
@@ -151,7 +154,7 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 
     console.log(allNodes, allEdges);
 
-    return { nodes: allNodes, edges: allEdges, parentNodes };
+    return { nodes: allNodes, edges: allEdges, parentNodes, loggerRequestedNodes };
 }
 
 const entitiesToIgnore = [

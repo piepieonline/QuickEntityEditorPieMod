@@ -83,6 +83,19 @@ const graphStyle = [
         }
     },
     {
+        selector: 'edge.fired-event',
+        css: {
+            'width': '10px',
+            'line-color': 'blue'
+        }
+    },
+    {
+        selector: 'node.fired-event',
+        css: {
+            'background-color': 'blue'
+        }
+    },
+    {
         selector: '[label]:selected',
         css: {
             'content': 'data(label)'

@@ -6,7 +6,7 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
     window.entityToProcess = entityToProcess;
     document.getElementById('entitiesToLoad').value = MAX_NODE_COUNT;
 
-    const { nodes, edges, parentNodes } = createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds);
+    const { nodes, edges, parentNodes, loggerRequestedNodes } = createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds);
 
     var cy = cytoscape({
 
@@ -86,11 +86,12 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
     });
 
     nodes.forEach(node => {
-        cy.add(node)
+        cy.add(node);
     });
 
+
     edges.forEach(edge => {
-        cy.add(edge)
+        cy.add(edge);
     });
 
 
@@ -111,6 +112,25 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         // Layout the squared edges
         createEdges(cy.edges());
     })
+
+    const socket = new WebSocket('ws://localhost:27016');
+
+    // Connection opened
+    socket.addEventListener('open', function (event) {
+        socket.send(JSON.stringify({ type: 'register', requestedPins: loggerRequestedNodes }));
+    });
+
+    // Listen for messages
+    socket.addEventListener('message', function (event) {
+        console.log('Message from server ', event.data);
+
+        const currentPin = JSON.parse(event.data);
+        const node = cy.getElementById(`${currentPin.qeID}_${currentPin.pinName}`);
+        const edges = node.connectedEdges();
+        node.addClass('fired-event');
+        edges.addClass('fired-event');
+        setTimeout(() => { node.removeClass('fired-event'); edges.removeClass('fired-event'); }, 1000);
+    });
 
     window.cy = cy;
 }
@@ -150,8 +170,7 @@ function ctxCopy(copyTarget) {
             const newEntity = Object.assign({}, entity);
             newEntity.parent = undefined;
             newEntity.entityID = undefined;
-            if(newEntity.properties.m_mTransform)
-            {
+            if (newEntity.properties.m_mTransform) {
                 newEntity.properties.m_mTransform.value.position = { x: newEntity.properties.m_mTransform.value.position.x.value, y: newEntity.properties.m_mTransform.value.position.y.value, z: newEntity.properties.m_mTransform.value.position.z.value }
                 newEntity.properties.m_mTransform.value.rotation = { x: newEntity.properties.m_mTransform.value.rotation.x.value, y: newEntity.properties.m_mTransform.value.rotation.y.value, z: newEntity.properties.m_mTransform.value.rotation.z.value }
             }
@@ -164,17 +183,14 @@ function ctxCopy(copyTarget) {
 }
 
 function ctxAddToIgnore(target) {
-    if(target)
-    {
+    if (target) {
         const id = window.ctxTarget.data('id');
         window.ignoredEntityIds.push(id);
     }
-    else
-    {
+    else {
         cy.nodes(':selected').forEach(node => {
             const id = node.data('id').split('_')[0];
-            if(!window.ignoredEntityIds.includes(id))
-            {
+            if (!window.ignoredEntityIds.includes(id)) {
                 window.ignoredEntityIds.push(id);
             }
         })
