@@ -10,7 +10,8 @@ function convertTemplate(entity) {
         '[modules:/zheroitemcondition.class].pc_entitytype': 'heroitemcondition',
         '[modules:/zboxvolumeentity.class].pc_entitytype': 'boxvolumeentity',
         '[modules:/zspatialentity.class].pc_entitytype': 'spatialentity',
-        'role': 'role'
+        'role': 'role',
+        // 'table_bangkok_basement_a01': 'prop'
     };
 
     // TODO: Sort these on likelyhood?

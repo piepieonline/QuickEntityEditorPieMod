@@ -109,7 +109,7 @@ function createVolumeBox(entity)
     const boxSize = readH3Vector(entity.properties.m_vGlobalSize.value, null);
 
     const geometry = new THREE.BoxGeometry( boxSize.x, boxSize.y, boxSize.z );
-    geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(0, boxSize.y / 2, 0) );
+    // geometry.applyMatrix4( new THREE.Matrix4().makeTranslation(boxSize.x / 2, boxSize.y / 2, boxSize.z / 2) );
 
     const material = new THREE.MeshLambertMaterial( { color: 0xfffdbe, wireframe: true } );
 

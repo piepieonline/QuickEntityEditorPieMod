@@ -51,6 +51,17 @@ async function load(idWithFocus)
 
     const { idToMesh, worldObjectsByType } = createWorld(scene);
 
+    const lineParent = new THREE.Group();
+    
+    const lineX = new THREE.Line( new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 2, 0, 0 ) ] ), new THREE.LineBasicMaterial({ color: 0xff0000 }) );
+    const lineY = new THREE.Line( new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 2, 0 ) ] ), new THREE.LineBasicMaterial({ color: 0x0000ff }) );
+    const lineZ = new THREE.Line( new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -2 ) ] ), new THREE.LineBasicMaterial({ color: 0x00ff00 }) );
+    lineParent.add( lineX );
+    lineParent.add( lineY );
+    lineParent.add( lineZ );
+
+    scene.add( lineParent );
+
     if(idToMesh[idWithFocus])
     {
         camera.position.x = idToMesh[idWithFocus].position.x;
@@ -95,6 +106,8 @@ async function load(idWithFocus)
             INTERSECTED.material.emissive.setHex( 0xff0000 );
 
             ObjectSelected(objectToSelect);
+
+            lineParent.position.set(objectToSelect.position.x, objectToSelect.position.y, objectToSelect.position.z)
         }
 
         const intersects = raycaster.intersectObjects( scene.children, false).filter(hit => hit.object.visible);
