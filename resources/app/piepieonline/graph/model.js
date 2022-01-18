@@ -1,6 +1,8 @@
 function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 {
+    const includedEvents = {};
     const loggerRequestedNodes = [];
+    const nodesToCheckExist = {};
     let parentNodes = [];
     let edgeIDCounter = 0;
     const createNode = (entity) => {
@@ -60,22 +62,67 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 
         vertOffset = 2;
 
-        const includedEvents = [];
         (entity.events || []).forEach(event => {
             const eventID = `${id}_${event.onEvent}`;
-            if (!includedEvents.includes(eventID)) {
-                nodes.push(
-                    { data: { id: `${id}_${event.onEvent}`, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++ }, grabbable: false }
-                )
-                includedEvents.push(eventID);
+            if (!includedEvents[eventID]) {
+                const newNode = { data: { id: eventID, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
+                nodes.push(newNode);
+                includedEvents[eventID] = newNode;
 
-                loggerRequestedNodes.push(`${id}_${event.onEvent}`);
+                loggerRequestedNodes.push(eventID);
             }
 
             edges.push(
                 { data: { id: `${eventID} >> ${event.onEntity}_input (${edgeIDCounter++})`, source: eventID, target: `${event.onEntity}_input`, label: event.shouldTrigger } }
             );
-        })
+        });
+
+        /*
+        (entity.inputCopying || []).forEach(event => {
+            const eventID = `${id}_${event.onEvent}`;
+            if (!includedEvents[eventID]) {
+                const newNode = { data: { id: eventID, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
+                nodes.push(newNode);
+                includedEvents[eventID] = newNode;
+
+                loggerRequestedNodes.push(eventID);
+            }
+
+            includedEvents[eventID].data.linkedEvents.push({ entity: event.onEntity, event: event.propagateEvent });
+        });
+        */
+
+        (entity.outputCopying || []).forEach(event => {
+            const eventID = `${id}_${event.onEvent}`;
+            const otherEventID = `${event.onEntity}_${event.propagateEvent}`;
+            if (!includedEvents[eventID]) {
+                const newNode = { data: { id: eventID, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
+                nodes.push(newNode);
+                includedEvents[eventID] = newNode;
+
+                loggerRequestedNodes.push(eventID);
+            }
+            
+            const newOtherNode = { data: { id: otherEventID, parent: event.onEntity, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
+            if (!includedEvents[otherEventID]) {
+                // nodes.push(newNode);
+                includedEvents[otherEventID] = newOtherNode;
+
+                loggerRequestedNodes.push(otherEventID);
+            }
+
+            if(!nodesToCheckExist[otherEventID])
+            {
+                nodesToCheckExist[otherEventID] = { node: newOtherNode, edges: [] };
+            } else if(!nodesToCheckExist[otherEventID].node)
+            {
+                nodesToCheckExist[otherEventID].node = newOtherNode;
+            }
+
+            nodesToCheckExist[otherEventID].edges.push(
+                { data: { id: `${eventID} >> ${otherEventID} (${edgeIDCounter++})`, source: eventID, target: otherEventID, label: event.propagateEvent } }
+            );
+        });
 
         maxVert = Math.max(maxVert, vertOffset);
 
@@ -113,8 +160,21 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
         }
 
         if (window.externallyLoadedModel.entities[nodesToProcess[0]]) {
-            const { nodes, edges } = createNode(window.externallyLoadedModel.entities[nodesToProcess[0]]);
+            const entityData = window.externallyLoadedModel.entities[nodesToProcess[0]];
+            const { nodes, edges } = createNode(entityData);
             allNodes.push(...nodes);
+
+            entityData.inputCopying?.forEach(event => {
+                if (shouldRecurse) {
+                    checkAndAddToProcessList(event.onEntity)
+                }
+            });
+
+            entityData.outputCopying?.forEach(event => {
+                if (shouldRecurse) {
+                    checkAndAddToProcessList(event.onEntity)
+                }
+            });
 
             edges.forEach(edge => {
                 let includedIDs = [edge.data.source.split('_')[0], edge.data.target.split('_')[0]];
@@ -145,6 +205,15 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
         }
 
         nodesToProcess.shift();
+    }
+
+    for(let nodeID in nodesToCheckExist)
+    {
+        if(parentNodes.includes(nodesToCheckExist[nodeID].node.data.parent))
+        {
+            allNodes.push(nodesToCheckExist[nodeID].node);
+            allEdges.push(...nodesToCheckExist[nodeID].edges)
+        }
     }
 
     allEdges = allEdges.filter(edge => {
