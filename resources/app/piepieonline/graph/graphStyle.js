@@ -68,7 +68,7 @@ const graphStyle = [
         css: {
             'content': 'data(label)',
             'text-valign': 'center',
-            'text-halign': 'left',
+            'text-halign': 'left'
         }
     },
     {

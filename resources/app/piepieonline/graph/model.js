@@ -3,6 +3,9 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
     const includedEvents = {};
     const loggerRequestedNodes = [];
     const nodesToCheckExist = {};
+
+    const parentNodeOffsets = {};
+
     let parentNodes = [];
     let edgeIDCounter = 0;
     const createNode = (entity) => {
@@ -22,11 +25,10 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
         const edges = [];
 
         nodes.push(
-            { data: { id: `${id}_input`, parent: id, entityInput: true, label: 'Entity ID', x: 0, y: 1 }, grabbable: false },
             { data: { id: `${id}_output`, parent: id, entityOutput: true, label: 'Entity ID', x: 2, y: 1 }, grabbable: false }
         )
 
-        let vertOffset = 2;
+        if(!parentNodeOffsets[id]) parentNodeOffsets[id] = { leftProp: 1, leftEvent: 1, right: 2};
 
         const props = [...Object.entries(entity.properties), ...Object.entries(entity.postInitProperties)];
         for (const [key, prop] of props) {
@@ -34,7 +36,7 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 
             function createNodeForProp() {
                 nodes.push(
-                    { data: { id: `${id}_${key}`, parent: id, entityInput: true, label: key, x: 0, y: vertOffset++ }, grabbable: false }
+                    { data: { id: `${id}_${key}`, parent: id, entityInput: true, label: key, x: 0, y: parentNodeOffsets[id].leftProp++ }, grabbable: false }
                 )
             }
 
@@ -58,75 +60,87 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             }
         }
 
-        let maxVert = vertOffset;
+        function createEdge(thisID, otherID, thisEntity, otherEntity, thisEvent, otherEvent)
+        {
+            if(!parentNodeOffsets[thisEntity]) parentNodeOffsets[thisEntity] = { leftProp: 1, leftEvent: 1, right: 2};
 
-        vertOffset = 2;
+            const newNode = { data: { id: thisID, parent: thisEntity, entityOutput: true, label: thisEvent + '()', x: 2, y: parentNodeOffsets[thisEntity].right++, linkedEvents: [] }, grabbable: false };
+            if (!includedEvents[thisID]) {
+                // nodes.push(newNode);
+                includedEvents[thisID] = newNode;
 
-        (entity.events || []).forEach(event => {
-            const eventID = `${id}_${event.onEvent}`;
-            if (!includedEvents[eventID]) {
-                const newNode = { data: { id: eventID, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
-                nodes.push(newNode);
-                includedEvents[eventID] = newNode;
-
-                loggerRequestedNodes.push(eventID);
-            }
-
-            edges.push(
-                { data: { id: `${eventID} >> ${event.onEntity}_input (${edgeIDCounter++})`, source: eventID, target: `${event.onEntity}_input`, label: event.shouldTrigger } }
-            );
-        });
-
-        /*
-        (entity.inputCopying || []).forEach(event => {
-            const eventID = `${id}_${event.onEvent}`;
-            if (!includedEvents[eventID]) {
-                const newNode = { data: { id: eventID, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
-                nodes.push(newNode);
-                includedEvents[eventID] = newNode;
-
-                loggerRequestedNodes.push(eventID);
-            }
-
-            includedEvents[eventID].data.linkedEvents.push({ entity: event.onEntity, event: event.propagateEvent });
-        });
-        */
-
-        (entity.outputCopying || []).forEach(event => {
-            const eventID = `${id}_${event.onEvent}`;
-            const otherEventID = `${event.onEntity}_${event.propagateEvent}`;
-            if (!includedEvents[eventID]) {
-                const newNode = { data: { id: eventID, parent: id, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
-                nodes.push(newNode);
-                includedEvents[eventID] = newNode;
-
-                loggerRequestedNodes.push(eventID);
+                loggerRequestedNodes.push(thisID);
             }
             
-            const newOtherNode = { data: { id: otherEventID, parent: event.onEntity, entityOutput: true, label: event.onEvent, x: 2, y: vertOffset++, linkedEvents: [] }, grabbable: false };
-            if (!includedEvents[otherEventID]) {
+            if(!nodesToCheckExist[thisID])
+            {
+                nodesToCheckExist[thisID] = { node: newNode, edges: [] };
+            } else if(!nodesToCheckExist[thisID].node)
+            {
+                nodesToCheckExist[thisID].node = newNode;
+            }
+
+
+
+            if(!parentNodeOffsets[otherEntity]) parentNodeOffsets[otherEntity] = { leftProp: 1, leftEvent: 1, right: 2};
+
+            const newOtherNode = { data: { id: otherID, parent: otherEntity, entityInput: true, label: '' + otherEvent + '()', x: 0, y: parentNodeOffsets[otherEntity].leftEvent++, eventNode: true }, grabbable: false };
+            if (!includedEvents[otherID]) {
                 // nodes.push(newNode);
-                includedEvents[otherEventID] = newOtherNode;
+                includedEvents[otherID] = newOtherNode;
 
-                loggerRequestedNodes.push(otherEventID);
+                loggerRequestedNodes.push(otherID);
             }
 
-            if(!nodesToCheckExist[otherEventID])
+            if(!nodesToCheckExist[otherID])
             {
-                nodesToCheckExist[otherEventID] = { node: newOtherNode, edges: [] };
-            } else if(!nodesToCheckExist[otherEventID].node)
+                nodesToCheckExist[otherID] = { node: newOtherNode, edges: [] };
+            } else if(!nodesToCheckExist[otherID].node)
             {
-                nodesToCheckExist[otherEventID].node = newOtherNode;
+                nodesToCheckExist[otherID].node = newOtherNode;
             }
 
-            nodesToCheckExist[otherEventID].edges.push(
-                { data: { id: `${eventID} >> ${otherEventID} (${edgeIDCounter++})`, source: eventID, target: otherEventID, label: event.propagateEvent } }
+            nodesToCheckExist[otherID].edges.push(
+                { data: { id: `${thisID} >> ${otherID} (${edgeIDCounter++})`, source: thisID, target: otherID } }
             );
+        }
+
+
+        (entity.events || []).forEach(event => {
+            createEdge(
+                `${id}_${event.onEvent}`,
+                `${event.onEntity}_${event.shouldTrigger}`,
+                id,
+                event.onEntity,
+                event.onEvent,
+                event.shouldTrigger
+            )
         });
 
-        maxVert = Math.max(maxVert, vertOffset);
+        (entity.outputCopying || []).forEach(event => {
+            createEdge(
+                `${id}_${event.onEvent}`,
+                `${event.onEntity}_${event.propagateEvent}`,
+                id,
+                event.onEntity,
+                event.onEvent,
+                event.propagateEvent
+            )
+        });
 
-        nodes.push({ data: { id: `${id}_type`, parent: id, entityType: true, x: 1, y: maxVert }, grabbable: false });
+        (entity.inputCopying || []).forEach(event => {
+            createEdge(
+                `${id}_${event.whenTriggered}`,
+                `${event.onEntity}_${event.alsoTrigger}`,
+                id,
+                event.onEntity,
+                event.whenTriggered,
+                event.alsoTrigger,
+            )
+        });
+
+
+        nodes.push({ data: { id: `${id}_type`, parent: id, entityType: true, x: 1, y: -1 }, grabbable: false });
 
         parentNodes.push(id);
 
@@ -215,6 +229,17 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             allEdges.push(...nodesToCheckExist[nodeID].edges)
         }
     }
+
+    allNodes.forEach(node => {
+        if(node.data.id.endsWith('_type'))
+        {
+            node.data.y = Math.max((parentNodeOffsets[node.data.parent].leftProp + parentNodeOffsets[node.data.parent].leftEvent + 1), parentNodeOffsets[node.data.parent].right)
+        }
+        if(node.data.eventNode)
+        {
+            node.data.y = node.data.y + parentNodeOffsets[node.data.parent].leftProp
+        }
+    })
 
     allEdges = allEdges.filter(edge => {
         let includedIDs = [edge.data.source.split('_')[0], edge.data.target.split('_')[0]];
