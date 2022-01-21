@@ -22,6 +22,7 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             { data: { id: `${id}_name`, parent: id, entityName: true, x: 1, y: 0 }, grabbable: false }
         ];
 
+        const nodesToAdd = [];
         const edges = [];
 
         nodes.push(
@@ -43,7 +44,9 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             function createEdgeForProp(otherId, label) {
                 edges.push(
                     { data: { id: `${otherId}_output >> ${id}_${key} (${edgeIDCounter++})`, source: `${otherId}_output`, target: `${id}_${key}`, label } }
-                )
+                );
+
+                nodesToAdd.push(otherId);
             }
 
             if (prop.type === 'SEntityTemplateReference') {
@@ -105,7 +108,6 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
             );
         }
 
-
         (entity.events || []).forEach(event => {
             createEdge(
                 `${id}_${event.onEvent}`,
@@ -114,9 +116,12 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
                 event.onEntity,
                 event.onEvent,
                 event.shouldTrigger
-            )
+            );
+
+            nodesToAdd.push(event.onEntity);
         });
 
+        /*
         (entity.outputCopying || []).forEach(event => {
             createEdge(
                 `${id}_${event.onEvent}`,
@@ -125,7 +130,9 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
                 event.onEntity,
                 event.onEvent,
                 event.propagateEvent
-            )
+            );
+
+            nodesToAdd.push(event.onEntity);
         });
 
         (entity.inputCopying || []).forEach(event => {
@@ -136,15 +143,18 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
                 event.onEntity,
                 event.whenTriggered,
                 event.alsoTrigger,
-            )
+            );
+
+            nodesToAdd.push(event.onEntity);
         });
+        */
 
 
         nodes.push({ data: { id: `${id}_type`, parent: id, entityType: true, x: 1, y: -1 }, grabbable: false });
 
-        parentNodes.push(id);
+        // parentNodes.push(id);
 
-        return { nodes, edges };
+        return { nodes, edges, nodesToAdd: nodesToAdd.filter((value, index, self) => self.indexOf(value) === index) };
     };
 
 
@@ -175,8 +185,13 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 
         if (window.externallyLoadedModel.entities[nodesToProcess[0]]) {
             const entityData = window.externallyLoadedModel.entities[nodesToProcess[0]];
-            const { nodes, edges } = createNode(entityData);
+            const { nodes, edges, nodesToAdd } = createNode(entityData);
+
+            parentNodes.push(nodes[0].data.id);
+
             allNodes.push(...nodes);
+
+            /*
 
             entityData.inputCopying?.forEach(event => {
                 if (shouldRecurse) {
@@ -198,6 +213,12 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
                     checkAndAddToProcessList(includedIDs[1])
                 }
             });
+
+            */
+            nodesToAdd.forEach(nodeToAddID => {
+                checkAndAddToProcessList(nodeToAddID);
+            });
+            
 
             if (externallyLoadedReferences && externallyLoadedReferences[nodesToProcess[0]]) {
                 externallyLoadedReferences[nodesToProcess[0]].forEach(referencingEntity => {

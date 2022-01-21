@@ -322,7 +322,47 @@ function contextMenu(b, c) {
 			
 				electron.clipboard.writeText(d.id)
 			}
-		}
+		},
+		gameComms: {
+			separator_before: !0,
+			icon: !1,
+			separator_after: !1,
+			label: "Game Comms",
+			action: !1,
+			submenu: {
+				highlight: {
+					separator_before: !1,
+					icon: !1,
+					separator_after: !1,
+					label: "Highlight",
+					action:  function (b) {
+						let d = editorTree.get_node(b.reference);
+					
+						try 
+						{
+							document.getElementById('pieGraphFrame').contentWindow.highlightInGame(d.id);
+						}
+						catch {}
+					}
+				},
+				updatePosition: {
+					separator_before: !1,
+					icon: !1,
+					_disabled: !1,
+					separator_after: !1,
+					label: "Update Position",
+					action:  function (b) {
+						let d = editorTree.get_node(b.reference);
+					
+						try 
+						{
+							document.getElementById('pieGraphFrame').contentWindow.updateInGame('position', d.id);
+						}
+						catch {}
+					}
+				}
+			}
+		},
 	}
 }
 

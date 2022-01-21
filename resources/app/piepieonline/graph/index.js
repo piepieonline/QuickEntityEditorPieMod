@@ -132,6 +132,41 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         setTimeout(() => { node.removeClass('fired-event'); edges.removeClass('fired-event'); }, 1000);
     });
 
+    window.highlightInGame = (requestedID) => {
+        const id = requestedID || window.ctxTarget.data('id').split('_')[0];
+        const entity = window.externallyLoadedModel.entities[id];
+
+        if(entity)
+        {
+            socket.send(JSON.stringify({ type: 'highlight', entityId: id }));
+        }
+        
+        closeContextMenu();
+    }
+
+    window.updateInGame = (property, requestedID) => {
+        const id = requestedID || window.ctxTarget.data('id').split('_')[0];
+        const entity = window.externallyLoadedModel.entities[id];
+
+        if(entity)
+        {
+            if(property === 'position')
+            {
+                socket.send(JSON.stringify({ type: 'update_position', entityId: id, positions: [
+                    entity.properties.m_mTransform.value.position.x.value,
+                    entity.properties.m_mTransform.value.position.y.value,
+                    entity.properties.m_mTransform.value.position.z.value
+                ], rotations: [
+                    entity.properties.m_mTransform.value.rotation.x.value,
+                    entity.properties.m_mTransform.value.rotation.y.value,
+                    entity.properties.m_mTransform.value.rotation.z.value
+                ] }));
+            }
+        }
+        
+        closeContextMenu();
+    }
+
     window.cy = cy;
 }
 
