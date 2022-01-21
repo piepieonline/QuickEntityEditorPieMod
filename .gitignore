@@ -12,3 +12,5 @@ resources/app/piepieonline/graphHelper2/**/*
 /PieGraphHelper/*
 !/PieGraphHelper/resources**
 !QuickEntityEditorPieExt.bat
+!_H3_Retail_mods
+!_H3_Retail_mods/LogPins**
