@@ -360,6 +360,22 @@ function contextMenu(b, c) {
 						}
 						catch {}
 					}
+				},
+				showCoverPlane: {
+					separator_before: !1,
+					icon: !1,
+					_disabled: !1,
+					separator_after: !1,
+					label: "Show cover plane",
+					action:  function (b) {
+						let d = editorTree.get_node(b.reference);
+					
+						try 
+						{
+							document.getElementById('pieGraphFrame').contentWindow.updateInGame('cover_plane', d.id);
+						}
+						catch {}
+					}
 				}
 			}
 		},

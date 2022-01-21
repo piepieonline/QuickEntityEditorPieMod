@@ -1,3 +1,3 @@
 cd .\PieGraphHelper
-START .\electron.exe
+.\electron.exe
 pause

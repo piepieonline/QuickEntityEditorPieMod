@@ -162,6 +162,23 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
                     entity.properties.m_mTransform.value.rotation.z.value
                 ] }));
             }
+            else if(property === 'cover_plane')
+            {
+                socket.send(JSON.stringify({ type: 'cover_plane', entityId: id, positions: [
+                    entity.properties.m_mTransform.value.position.x.value,
+                    entity.properties.m_mTransform.value.position.y.value,
+                    entity.properties.m_mTransform.value.position.z.value
+                ], rotations: [
+                    entity.properties.m_mTransform.value.rotation.x.value,
+                    entity.properties.m_mTransform.value.rotation.y.value,
+                    entity.properties.m_mTransform.value.rotation.z.value
+                ], size: [
+                    entity.properties.m_fCoverLength.value.value,
+                    entity.properties.m_fCoverDepth.value.value,
+                    entity.properties.m_eCoverSize.value === 'eLowCover' ? 1 : 2
+                ]
+            }));
+            } 
         }
         
         closeContextMenu();

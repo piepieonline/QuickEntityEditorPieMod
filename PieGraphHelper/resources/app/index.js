@@ -102,6 +102,11 @@ function loadServer(shouldLog, callback) {
                     if(currentGameConnectionInfo)
                         gameServer.send(`P_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
+                case 'cover_plane':
+                    console.log(message.entityId)
+                    if(currentGameConnectionInfo)
+                        gameServer.send(`C_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}_${message.size.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                    break;
             }
         });
     });
