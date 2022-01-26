@@ -12,6 +12,17 @@ function loadServer(shouldLog, callback) {
     let currentGameConnectionInfo;
 
     function onMessageRecieved(msg) {
+        if(msg.startsWith('I_') || msg.startsWith('O_'))
+            DoPin(msg);
+        else if (msg.startsWith('HeroPosition'))
+        {
+            const [ msgType, x, y, z] = msg.split('_');
+            requestedPins.mostRecent.send(JSON.stringify({ type: msgType, x, y, z }))
+            console.log('sent ' + msgType);
+        }
+    }
+
+    function DoPin(msg) {
         let [pinType, pinId, entityId] = msg.trim().split('_');
 
         if (!pinType || !pinId || !entityId) return;
@@ -19,10 +30,10 @@ function loadServer(shouldLog, callback) {
         let qeID = new Decimal(entityId).toHex().substring(2);
 
         if (knownPins[pinId] || knownPins[((-~pinId) - 1) + '']) {
-            currentPin = { pinId, pinType, pinName: knownPins[pinId] || knownPins[((-~pinId) - 1) + ''], qeID };
+            currentPin = { type: 'Pin', pinId, pinType, pinName: knownPins[pinId] || knownPins[((-~pinId) - 1) + ''], qeID };
         }
         else {
-            currentPin = { pinId, pinType, tcPinId: (-~pinId) - 1, qeID };
+            currentPin = { type: 'Pin', pinId, pinType, tcPinId: (-~pinId) - 1, qeID };
         }
 
         if (shouldLog)
@@ -32,7 +43,7 @@ function loadServer(shouldLog, callback) {
 
         if (requestedPins && requestedPins[`${currentPin.qeID}_${currentPin.pinName}`]) {
             requestedPins[`${currentPin.qeID}_${currentPin.pinName}`].send(JSON.stringify(currentPin));
-            console.log('sent');
+            console.log('sent Pin');
             console.log(currentPin)
         }
     }
@@ -91,6 +102,7 @@ function loadServer(shouldLog, callback) {
                 case 'register':
                     console.log(message.requestedPins)
                     requestedPins = message.requestedPins.reduce((prev, val) => { prev[val] = ws; return prev; }, {});
+                    requestedPins.mostRecent = ws;
                     break;
                 case 'highlight':
                     console.log(message.entityId)
@@ -107,6 +119,9 @@ function loadServer(shouldLog, callback) {
                     if(currentGameConnectionInfo)
                         gameServer.send(`C_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}_${message.size.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
+                case 'hero_position':
+                    if(currentGameConnectionInfo)
+                        gameServer.send(`HeroPosition`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);  
             }
         });
     });

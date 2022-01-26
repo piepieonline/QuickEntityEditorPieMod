@@ -2,6 +2,8 @@
 
 window.ignoredEntityIds = [];
 
+let transformToUpdateOnReturnMessage;
+
 function load(entityToProcess, MAX_NODE_COUNT = 100) {
     window.entityToProcess = entityToProcess;
     document.getElementById('entitiesToLoad').value = MAX_NODE_COUNT;
@@ -124,12 +126,29 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
     socket.addEventListener('message', function (event) {
         console.log('Message from server ', event.data);
 
-        const currentPin = JSON.parse(event.data);
-        const node = cy.getElementById(`${currentPin.qeID}_${currentPin.pinName}`);
-        const edges = node.connectedEdges();
-        node.addClass('fired-event');
-        edges.addClass('fired-event');
-        setTimeout(() => { node.removeClass('fired-event'); edges.removeClass('fired-event'); }, 1000);
+        const message = JSON.parse(event.data);
+
+        if(message.type === 'Pin')
+        {
+            const node = cy.getElementById(`${message.qeID}_${message.pinName}`);
+            const edges = node.connectedEdges();
+            node.addClass('fired-event');
+            edges.addClass('fired-event');
+            setTimeout(() => { node.removeClass('fired-event'); edges.removeClass('fired-event'); }, 1000);
+        }
+        else if (message.type === 'HeroPosition')
+        {
+            console.log(message);
+
+            if(transformToUpdateOnReturnMessage && window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage]?.properties?.m_mTransform)
+            {
+                window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage].properties.m_mTransform.value.position.x.value = message.x;
+                window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage].properties.m_mTransform.value.position.y.value = message.y;
+                window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage].properties.m_mTransform.value.position.z.value = message.z;
+
+                displayEntityInSnippetEditor(window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage]);
+            }
+        }
     });
 
     window.highlightInGame = (requestedID) => {
@@ -147,6 +166,8 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
     window.updateInGame = (property, requestedID) => {
         const id = requestedID || window.ctxTarget.data('id').split('_')[0];
         const entity = window.externallyLoadedModel.entities[id];
+
+        externalEditorTree.select_node(id);
 
         if(entity)
         {
@@ -181,6 +202,12 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
             } 
         }
         
+        closeContextMenu();
+    }
+
+    window.requestPosition = (idToChange) => {
+        socket.send(JSON.stringify({ type: 'hero_position' }));
+        transformToUpdateOnReturnMessage = idToChange;
         closeContextMenu();
     }
 

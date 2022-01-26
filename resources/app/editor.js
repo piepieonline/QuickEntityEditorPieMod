@@ -376,6 +376,22 @@ function contextMenu(b, c) {
 						}
 						catch {}
 					}
+				},
+				showHeroPosition: {
+					separator_before: !1,
+					icon: !1,
+					_disabled: !1,
+					separator_after: !1,
+					label: "Set transform to hero position",
+					action:  function (b) {
+						let d = editorTree.get_node(b.reference);
+
+						try 
+						{
+							document.getElementById('pieGraphFrame').contentWindow.requestPosition(d.id);
+						}
+						catch {}
+					}
 				}
 			}
 		},
@@ -1710,6 +1726,9 @@ function changeView(view) {
 				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedReferences = reverseReferences;
 				document.getElementById('pieGraphFrame').contentWindow.externalEditorTree = editorTree;
 				document.getElementById('pieGraphFrame').contentWindow.hashList = hashListAsObject;
+
+				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
+				
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
 			}, 1000);
 
