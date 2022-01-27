@@ -47,10 +47,10 @@ originalEntityJSON = "{}"
 
 hasChildren = {}
 
-editorGraphForceLayout = {kill: () => {}} // good programming
+editorGraphForceLayout = { kill: () => { } } // good programming
 
-var hashList = String(fs.readFileSync("hash_list.txt")).split("\n").map(a=>{ return {path: a.split(",")[1], hash:a.split(",")[0]}}).slice(3)
-var hashListAsObject = Object.fromEntries(hashList.map(a=>[a.hash, a.path]))
+var hashList = String(fs.readFileSync("hash_list.txt")).split("\n").map(a => { return { path: a.split(",")[1], hash: a.split(",")[0] } }).slice(3)
+var hashListAsObject = Object.fromEntries(hashList.map(a => [a.hash, a.path]))
 
 const XMLParser = new DOMParser()
 
@@ -59,7 +59,7 @@ const allModules = fs.existsSync("modules") ? fs.readdirSync("modules").map(a =>
 autosize(document.querySelector("#commentEditorText"))
 
 function searchHash(query) {
-	var result = hashList.find(a=>a.path == query)
+	var result = hashList.find(a => a.path == query)
 	return result ? result.hash : query
 }
 
@@ -87,12 +87,12 @@ function traverseEntityTree(startingPoint) {
 	let copiedEntity = []
 
 	try {
-		copiedEntity.push(...Object.values(entity.entities).filter(a=>a.type != "comment").filter(a => getReferencedLocalEntity(a.parent) == startingPoint))
+		copiedEntity.push(...Object.values(entity.entities).filter(a => a.type != "comment").filter(a => getReferencedLocalEntity(a.parent) == startingPoint))
 
 		for (let newEntity of copiedEntity) {
 			copiedEntity.push(...traverseEntityTree(newEntity.entityID))
 		}
-	} catch {}
+	} catch { }
 
 	return copiedEntity.filter((thing, index, self) =>
 		index === self.findIndex((t) => (
@@ -108,9 +108,9 @@ function copyNode(b) {
 	if (entity.entities[d.id].type == "comment") return
 
 	copiedEntity[d.id] = LosslessJSON.parse(LosslessJSON.stringify(entity.entities[d.id]))
-	Object.assign(copiedEntity, LosslessJSON.parse(LosslessJSON.stringify(Object.fromEntries(traverseEntityTree(d.id).map(a=>[a.entityID, a])))))
+	Object.assign(copiedEntity, LosslessJSON.parse(LosslessJSON.stringify(Object.fromEntries(traverseEntityTree(d.id).map(a => [a.entityID, a])))))
 
-	copiedEntity = Object.fromEntries(Object.values(copiedEntity).map(a=>[a.entityID, a]))
+	copiedEntity = Object.fromEntries(Object.values(copiedEntity).map(a => [a.entityID, a]))
 
 	copiedEntity.origin = entity.tempHash
 
@@ -131,8 +131,8 @@ function pasteNode(b) {
 	let removeExternalRefs = pastedEntity.origin != entity.tempHash
 	delete pastedEntity.origin
 
-	pastedEntity = Object.fromEntries(Object.values(pastedEntity).map(a=>[a.entityID, a]))
-	
+	pastedEntity = Object.fromEntries(Object.values(pastedEntity).map(a => [a.entityID, a]))
+
 	for (let ent of Object.entries(pastedEntity)) {
 		ent[1].parent = getReferencedLocalEntity(ent[1].parent) && changedEntityIDs[getReferencedLocalEntity(ent[1].parent)] ? changeReferenceToLocalEntity(ent[1].parent, changedEntityIDs[getReferencedLocalEntity(ent[1].parent)]) : ent[1].parent
 
@@ -223,6 +223,79 @@ function pasteNode(b) {
 }
 
 function contextMenu(b, c) {
+	function createGameCommsMenu() {
+		const commsItems = {};
+		
+		const selectedEntity = entity.entities[b.id];
+
+		if(!selectedEntity) return commsItems;
+
+		const hasTransform = !!selectedEntity.properties.m_mTransform;
+		const isCoverplane = selectedEntity.template === '[modules:/zcoverplane.class].pc_entitytype';
+		const hasVolumeBox = !!selectedEntity.properties.m_vGlobalSize;
+
+		if (hasTransform || isCoverplane || hasVolumeBox)
+		{
+			let label = 'Highlight';
+			if(isCoverplane) label = 'Show cover plane';
+			if(hasVolumeBox) label = 'Show volume box';
+
+			commsItems.highlight = {
+				separator_before: !1,
+				icon: !1,
+				separator_after: !1,
+				label,
+				action: function (b) {
+					let d = editorTree.get_node(b.reference);
+
+					try {
+						if(isCoverplane || hasVolumeBox)
+							document.getElementById('pieGraphFrame').contentWindow.updateInGame('draw_volume', d.id);
+						else
+							document.getElementById('pieGraphFrame').contentWindow.highlightInGame(d.id);
+					}
+					catch { }
+				}
+			};
+		}
+
+		if (hasTransform)
+			commsItems.updatePosition = {
+				separator_before: !1,
+				icon: !1,
+				_disabled: !1,
+				separator_after: !1,
+				label: "Update Position",
+				action: function (b) {
+					let d = editorTree.get_node(b.reference);
+
+					try {
+						document.getElementById('pieGraphFrame').contentWindow.updateInGame('position', d.id);
+					}
+					catch { }
+				}
+			};
+
+		if (hasTransform)
+			commsItems.setToHeroPosition = {
+				separator_before: !1,
+				icon: !1,
+				_disabled: !1,
+				separator_after: !1,
+				label: "Set transform to hero position",
+				action: function (b) {
+					let d = editorTree.get_node(b.reference);
+
+					try {
+						document.getElementById('pieGraphFrame').contentWindow.requestPosition(d.id);
+					}
+					catch { }
+				}
+			};
+
+		return commsItems;
+	}
+
 	return {
 		create: {
 			separator_before: !1,
@@ -250,17 +323,17 @@ function contextMenu(b, c) {
 			label: "Add Comment",
 			action: function (b) {
 				let entityID = "comment" + genRandHex(9)
-			
+
 				justCreatedNode = true
 				createdNode = entityID
-			
+
 				entity.entities[entityID] = {
 					"parent": $.jstree.reference(b.reference).get_node(b.reference).id,
 					"type": "comment",
 					"name": "New Comment",
 					"text": ""
 				}
-				
+
 				refreshEditor()
 			}
 		},
@@ -319,7 +392,7 @@ function contextMenu(b, c) {
 			label: "Copy ID",
 			action: function (b) {
 				let d = editorTree.get_node(b.reference);
-			
+
 				electron.clipboard.writeText(d.id)
 			}
 		},
@@ -329,71 +402,7 @@ function contextMenu(b, c) {
 			separator_after: !1,
 			label: "Game Comms",
 			action: !1,
-			submenu: {
-				highlight: {
-					separator_before: !1,
-					icon: !1,
-					separator_after: !1,
-					label: "Highlight",
-					action:  function (b) {
-						let d = editorTree.get_node(b.reference);
-					
-						try 
-						{
-							document.getElementById('pieGraphFrame').contentWindow.highlightInGame(d.id);
-						}
-						catch {}
-					}
-				},
-				updatePosition: {
-					separator_before: !1,
-					icon: !1,
-					_disabled: !1,
-					separator_after: !1,
-					label: "Update Position",
-					action:  function (b) {
-						let d = editorTree.get_node(b.reference);
-					
-						try 
-						{
-							document.getElementById('pieGraphFrame').contentWindow.updateInGame('position', d.id);
-						}
-						catch {}
-					}
-				},
-				showCoverPlane: {
-					separator_before: !1,
-					icon: !1,
-					_disabled: !1,
-					separator_after: !1,
-					label: "Show cover plane",
-					action:  function (b) {
-						let d = editorTree.get_node(b.reference);
-					
-						try 
-						{
-							document.getElementById('pieGraphFrame').contentWindow.updateInGame('cover_plane', d.id);
-						}
-						catch {}
-					}
-				},
-				showHeroPosition: {
-					separator_before: !1,
-					icon: !1,
-					_disabled: !1,
-					separator_after: !1,
-					label: "Set transform to hero position",
-					action:  function (b) {
-						let d = editorTree.get_node(b.reference);
-
-						try 
-						{
-							document.getElementById('pieGraphFrame').contentWindow.requestPosition(d.id);
-						}
-						catch {}
-					}
-				}
-			}
+			submenu: createGameCommsMenu()
 		},
 	}
 }
@@ -415,24 +424,24 @@ async function inspectBrick() {
 			properties: ["openFile", "dontAddToRecent"],
 			defaultPath: rpkgPath
 		})[0]
-	
+
 		execSync(`rpkg-cli.exe -extract_from_rpkg "${rpkgPath}" -filter "${window.sessionStorage.brickToInspect.split(".")[0]}" -output_path temp\\`)
-	
+
 		var tempPath = path.join("temp", path.basename(rpkgPath).slice(0, -5), window.sessionStorage.brickToInspect.split(".")[1], window.sessionStorage.brickToInspect)
 		var tempMetaPath = path.join("temp", path.basename(rpkgPath).slice(0, -5), window.sessionStorage.brickToInspect.split(".")[1], window.sessionStorage.brickToInspect + ".meta")
 		execSync("ResourceTool.exe HM3 convert TEMP \"" + tempPath + "\" \"" + tempPath + ".json\" --simple")
 		execSync("rpkg-cli.exe -hash_meta_to_json \"" + tempMetaPath + "\"")
-	
+
 		var tbluHash = searchHash(JSON.parse(String(fs.readFileSync(tempMetaPath + ".json"))).hash_reference_data[JSON.parse(String(fs.readFileSync(tempPath + ".json"))).blueprintIndexInResourceHeader].hash)
 		if (!tbluHash.includes(".")) { tbluHash = tbluHash + ".TBLU" }
 
 		execSync(`rpkg-cli.exe -extract_from_rpkg "${rpkgPath2}" -filter "${tbluHash.split(".")[0]}" -output_path temp\\`)
-	
+
 		var tbluPath = path.join("temp", path.basename(rpkgPath2).slice(0, -5), tbluHash.split(".")[1], tbluHash)
 		var tbluMetaPath = path.join("temp", path.basename(rpkgPath2).slice(0, -5), tbluHash.split(".")[1], tbluHash + ".meta")
 		execSync("ResourceTool.exe HM3 convert TBLU \"" + tbluPath + "\" \"" + tbluPath + ".json\" --simple")
 		execSync("rpkg-cli.exe -hash_meta_to_json \"" + tbluMetaPath + "\"")
-	
+
 		await (require("./quickentity")).convert("HM3", tempPath + ".json", tempMetaPath + ".json", tbluPath + ".json", tbluMetaPath + ".json", path.join("temp", "QuickEntityJSON.json"))
 	}
 }
@@ -465,7 +474,7 @@ function searchContent(search, node) {
 function sortFunction(a, b) {
 	if (shouldSort) {
 		if ((!(this.get_node(a).original ? this.get_node(a).original : this.get_node(a)).folder && !(this.get_node(b).original ? this.get_node(b).original : this.get_node(b)).folder) || ((this.get_node(a).original ? this.get_node(a).original : this.get_node(a)).folder && (this.get_node(b).original ? this.get_node(b).original : this.get_node(b)).folder)) {
-			return (this.get_text(a).localeCompare(this.get_text(b), undefined, {numeric: true, sensitivity: 'base'}) > 0) ? 1 : -1
+			return (this.get_text(a).localeCompare(this.get_text(b), undefined, { numeric: true, sensitivity: 'base' }) > 0) ? 1 : -1
 		} else {
 			return (this.get_node(a).original ? this.get_node(a).original : this.get_node(a)).folder ? -1 : 1
 		}
@@ -504,7 +513,7 @@ async function loadEditor() {
 				"dots": true,
 				"icons": true
 			},
-			"check_callback" : true
+			"check_callback": true
 		},
 		"search": {
 			"fuzzy": true,
@@ -517,7 +526,7 @@ async function loadEditor() {
 			"select_node": false,
 			"items": contextMenu
 		},
-		"plugins" : ["contextmenu", "dnd", "search", "sort"]
+		"plugins": ["contextmenu", "dnd", "search", "sort"]
 	})
 
 	var to = false;
@@ -567,7 +576,7 @@ async function loadEditor() {
 function createSnippetEditor() {
 	self.module = undefined
 
-	requirejs(['vs/editor/editor.main'], function() {
+	requirejs(['vs/editor/editor.main'], function () {
 		monaco.editor.defineTheme('shutUpAnthony', {
 			base: 'vs-dark',
 			inherit: true,
@@ -588,12 +597,12 @@ function createSnippetEditor() {
 function buildReverseRefs() {
 	reverseReferences = {}
 
-	for (var entry of Object.keys(entity.entities).filter(a=>entity.entities[a].type != "comment")) {
+	for (var entry of Object.keys(entity.entities).filter(a => entity.entities[a].type != "comment")) {
 		reverseReferences[entry] = []
 	}
 
 	try {
-		for (var entry of Object.entries(entity.entities).filter(a=>a[1].type != "comment")) {
+		for (var entry of Object.entries(entity.entities).filter(a => a[1].type != "comment")) {
 			hasChildren[getReferencedLocalEntity(entry[1].parent)] = true
 
 			for (var property of Object.entries(entry[1].properties)) {
@@ -615,7 +624,7 @@ function buildReverseRefs() {
 					}
 				}
 			}
-			
+
 			for (var property of Object.entries(entry[1].postInitProperties)) {
 				if (property[1].type == "SEntityTemplateReference") {
 					if (getReferencedLocalEntity(property[1].value)) {
@@ -687,7 +696,7 @@ function buildReverseRefs() {
 }
 
 function refreshEditor() {
-	for (let entry of Object.keys(entity.entities).filter(a=>a[1].type != "comment")) {
+	for (let entry of Object.keys(entity.entities).filter(a => a[1].type != "comment")) {
 		entity.entities[entry].entityID = entry
 	}
 
@@ -710,7 +719,7 @@ function refreshEditor() {
 
 		"levelflow.template?/exit": "fas fa-sign-out-alt",
 		"zitem": "fas fa-wrench", // Specific
-		
+
 		"blockup": "fas fa-cube",
 		"setpiece_container_body": "fas fa-box-open",
 		"setpiece_trap": "fas fa-skull-crossbones",
@@ -736,7 +745,7 @@ function refreshEditor() {
 			editorTree.settings.core.data.push({
 				id: String(entry[0]), // required
 				parent: getReferencedLocalEntity(entry[1].parent) || "#", // required
-				icon: (entry[1].template == "[modules:/zentity.class].pc_entitytype" && hasChildren[entry[0]]) ? "far fa-folder" : (icons.find(a=>entry[1].template.includes(a[0])) ? icons.find(a=>entry[1].template.includes(a[0]))[1] : "far fa-file"), // icon
+				icon: (entry[1].template == "[modules:/zentity.class].pc_entitytype" && hasChildren[entry[0]]) ? "far fa-folder" : (icons.find(a => entry[1].template.includes(a[0])) ? icons.find(a => entry[1].template.includes(a[0]))[1] : "far fa-file"), // icon
 				text: `${entry[1].name} (ref ${entry[0]})`, // node text
 				folder: entry[1].template == "[modules:/zentity.class].pc_entitytype" && hasChildren[entry[0]] // for sorting and stuff
 			})
@@ -894,12 +903,12 @@ async function nodeDeleted(e, data) {
 
 	for (let ent of traverseEntityTree(data.node.id)) {
 		buildReverseRefs()
-		try { deleteReferencesToEntity(ent.entityID) } catch {}
+		try { deleteReferencesToEntity(ent.entityID) } catch { }
 		delete entity.entities[ent.entityID]
 	}
 
 	buildReverseRefs()
-	try { deleteReferencesToEntity(data.node.id) } catch {}
+	try { deleteReferencesToEntity(data.node.id) } catch { }
 	delete entity.entities[data.node.id]
 
 	buildReverseRefs()
@@ -934,7 +943,7 @@ function displayEntityInSnippetEditor(theEntity) {
 		if (!reverseReferences[theEntity.entityID]) {
 			reverseReferences[theEntity.entityID] = []
 		}
-	
+
 		if (editMode == "json") {
 			snippetEditor.setValue(beautify(LosslessJSON.stringify(theEntity), {
 				"indent_size": "1",
@@ -957,13 +966,13 @@ function displayEntityInSnippetEditor(theEntity) {
 			}))
 			monaco.editor.setTheme("vs-dark")
 			monaco.editor.setTheme("shutUpAnthony")
-	
+
 			var x = `
 				<div>
 					<span class="font-semibold text-lg mr-2">Parent</span><span onclick="${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? 'editorTree.deselect_node(currentlySelected); editorTree.select_node(\'' + getReferencedLocalEntity(theEntity.parent) + '\')' : ''}" class="${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? 'text-gray-200 underline' : ''}">${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? entity.entities[getReferencedLocalEntity(theEntity.parent)].name : "None"}${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? ' (ref ' + getReferencedLocalEntity(theEntity.parent) + ')' : ''}</span>
 				</div>
 			`
-	
+
 			for (var property of Object.entries(theEntity.properties)) {
 				if (property[1].type == "SEntityTemplateReference") {
 					if (getReferencedLocalEntity(property[1].value)) {
@@ -985,7 +994,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					}
 				}
 			}
-	
+
 			for (var property of Object.entries(theEntity.postInitProperties)) {
 				if (property[1].type == "SEntityTemplateReference") {
 					if (getReferencedLocalEntity(property[1].value)) {
@@ -1007,7 +1016,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					}
 				}
 			}
-	
+
 			if (theEntity.entitySubsets) {
 				for (var subset of theEntity.entitySubsets) {
 					for (let ent of subset[1].entities) {
@@ -1019,7 +1028,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					}
 				}
 			}
-	
+
 			if (theEntity.events) {
 				for (var pin of theEntity.events) {
 					x += `
@@ -1029,7 +1038,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					`
 				}
 			}
-	
+
 			if (theEntity.inputCopying) {
 				for (var pin of theEntity.inputCopying) {
 					x += `
@@ -1039,7 +1048,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					`
 				}
 			}
-	
+
 			if (theEntity.outputCopying) {
 				for (var pin of theEntity.outputCopying) {
 					x += `
@@ -1049,12 +1058,12 @@ function displayEntityInSnippetEditor(theEntity) {
 					`
 				}
 			}
-	
+
 			document.getElementById("entityName").innerText = theEntity.name
 			document.getElementById("entityProperties").innerHTML = x
-	
+
 			var reverseRefsHTML = ``
-	
+
 			for (var ref of reverseReferences[theEntity.entityID]) {
 				reverseRefsHTML += `
 					<div>
@@ -1062,17 +1071,17 @@ function displayEntityInSnippetEditor(theEntity) {
 					</div>
 				`
 			}
-	
+
 			document.getElementById("entityReverseRefs").innerHTML = reverseRefsHTML
 		} else {
 			// REFERENCES
-	
+
 			var x = `
 				<div>
 					<span class="font-semibold text-lg mr-2">Parent</span><span onclick="${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? 'editorTree.deselect_node(currentlySelected); editorTree.select_node(\'' + getReferencedLocalEntity(theEntity.parent) + '\')' : ''}" class="${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? 'text-gray-200 underline' : ''}">${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? entity.entities[getReferencedLocalEntity(theEntity.parent)].name : "None"}${entity.entities[getReferencedLocalEntity(theEntity.parent)] ? ' (ref ' + getReferencedLocalEntity(theEntity.parent) + ')' : ''}</span>
 				</div>
 			`
-	
+
 			for (var property of Object.entries(theEntity.properties)) {
 				if (property[1].type == "SEntityTemplateReference") {
 					if (getReferencedLocalEntity(property[1].value)) {
@@ -1094,7 +1103,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					}
 				}
 			}
-	
+
 			for (var property of Object.entries(theEntity.postInitProperties)) {
 				if (property[1].type == "SEntityTemplateReference") {
 					if (getReferencedLocalEntity(property[1].value)) {
@@ -1116,7 +1125,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					}
 				}
 			}
-	
+
 			if (theEntity.entitySubsets) {
 				for (var subset of theEntity.entitySubsets) {
 					for (let ent of subset[1].entities) {
@@ -1128,7 +1137,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					}
 				}
 			}
-	
+
 			if (theEntity.events) {
 				for (var pin of theEntity.events) {
 					x += `
@@ -1138,7 +1147,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					`
 				}
 			}
-	
+
 			if (theEntity.inputCopying) {
 				for (var pin of theEntity.inputCopying) {
 					x += `
@@ -1148,7 +1157,7 @@ function displayEntityInSnippetEditor(theEntity) {
 					`
 				}
 			}
-	
+
 			if (theEntity.outputCopying) {
 				for (var pin of theEntity.outputCopying) {
 					x += `
@@ -1158,12 +1167,12 @@ function displayEntityInSnippetEditor(theEntity) {
 					`
 				}
 			}
-	
+
 			document.getElementById("entityName").innerText = theEntity.name
 			document.getElementById("entityProperties").innerHTML = x
-	
+
 			var reverseRefsHTML = ``
-	
+
 			for (var ref of reverseReferences[theEntity.entityID]) {
 				reverseRefsHTML += `
 					<div>
@@ -1171,23 +1180,23 @@ function displayEntityInSnippetEditor(theEntity) {
 					</div>
 				`
 			}
-	
+
 			document.getElementById("entityReverseRefs").innerHTML = reverseRefsHTML
-	
+
 			// EDITOR COMPONENTS
-	
+
 			var parentEditor = document.createElement("div")
 			parentEditor.innerHTML = `<span class="text-2xl font-semibold mb-2">Properties</span><br>`
-	
+
 			var visualEditor = document.createElement("div")
 			parentEditor.appendChild(visualEditor)
-	
+
 			var allProperties = []
-			allProperties.push(...Object.entries(theEntity.properties).map(a=>{return {name: a[0], type: a[1].type, value: a[1].value}}))
-			allProperties.push(...Object.entries(theEntity.postInitProperties).map(a=>{return {name: a[0], type: a[1].type, value: a[1].value}}))
-	
+			allProperties.push(...Object.entries(theEntity.properties).map(a => { return { name: a[0], type: a[1].type, value: a[1].value } }))
+			allProperties.push(...Object.entries(theEntity.postInitProperties).map(a => { return { name: a[0], type: a[1].type, value: a[1].value } }))
+
 			curveEditors = []
-	
+
 			for (var property of allProperties) {
 				switch (property.type) {
 					case "SMatrix43": // 3 x 2 matrix input
@@ -1212,18 +1221,18 @@ function displayEntityInSnippetEditor(theEntity) {
 												<input class="shadow appearance-none border rounded w-1/4 py-2 px-2.5 text-black" type="text" placeholder="z (initial: ${property.value.rotation.z})" value="${property.value.rotation.z}">
 											</div>
 										</div>`
-	
+
 						var inputs = ["position|x", "position|y", "position|z", "rotation|x", "rotation|y", "rotation|z"]
 						for (var input in inputs) {
 							y.querySelectorAll("input")[input].propertyToSaveTo = property.name + "|" + inputs[input]
-							y.querySelectorAll("input")[input].addEventListener("input", function() {
+							y.querySelectorAll("input")[input].addEventListener("input", function () {
 								theEntity.properties[this.propertyToSaveTo.split("|")[0]].value[this.propertyToSaveTo.split("|")[1]][this.propertyToSaveTo.split("|")[2]] = new LosslessJSON.LosslessNumber(this.value)
 							})
 						}
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "SVector3": // 3 x 1 matrix input
 						var y = document.createElement("div")
 						y.innerHTML = ` <div class="mb-4">
@@ -1236,18 +1245,18 @@ function displayEntityInSnippetEditor(theEntity) {
 												<input class="shadow appearance-none border rounded w-1/4 py-2 px-2.5 text-black" type="text" placeholder="z (initial: ${property.value.z})" value="${property.value.z}">
 											</div>
 										</div>`
-	
+
 						var inputs = ["x", "y", "z"]
 						for (var input in inputs) {
 							y.querySelectorAll("input")[input].propertyToSaveTo = property.name + "|" + inputs[input]
-							y.querySelectorAll("input")[input].addEventListener("input", function() {
+							y.querySelectorAll("input")[input].addEventListener("input", function () {
 								theEntity.properties[this.propertyToSaveTo.split("|")[0]].value[this.propertyToSaveTo.split("|")[1]] = new LosslessJSON.LosslessNumber(this.value)
 							})
 						}
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "SVector2": // 2 x 1 matrix input
 						var y = document.createElement("div")
 						y.innerHTML = ` <div class="mb-4">
@@ -1259,34 +1268,34 @@ function displayEntityInSnippetEditor(theEntity) {
 												<input class="shadow appearance-none border rounded w-1/4 py-2 px-2.5 text-black" type="text" placeholder="y (initial: ${property.value.y})" value="${property.value.y}">
 											</div>
 										</div>`
-	
+
 						var inputs = ["x", "y"]
 						for (var input in inputs) {
 							y.querySelectorAll("input")[input].propertyToSaveTo = property.name + "|" + inputs[input]
-							y.querySelectorAll("input")[input].addEventListener("input", function() {
+							y.querySelectorAll("input")[input].addEventListener("input", function () {
 								theEntity.properties[this.propertyToSaveTo.split("|")[0]].value[this.propertyToSaveTo.split("|")[1]] = new LosslessJSON.LosslessNumber(this.value)
 							})
 						}
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "ZGuid":
 					case "ZString":
 					case "ZRuntimeResourceID":
 					case "SEntityTemplateReference": // String input
 						var y = document.createElement("div")
 						y.innerHTML = `<neo-input label="${property.name}" placeholder="Initial: ${property.value}"></neo-input>`
-	
+
 						y.children[0].value = property.value
 						y.children[0].propertyToSaveTo = property.name
-						y.children[0].addEventListener("input", function() {
+						y.children[0].addEventListener("input", function () {
 							theEntity.properties[this.propertyToSaveTo].value = this.value
 						})
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "int32":
 					case "uint32":
 					case "uint8":
@@ -1295,65 +1304,65 @@ function displayEntityInSnippetEditor(theEntity) {
 					case "float32": // Number input
 						var y = document.createElement("div")
 						y.innerHTML = `<neo-input label="${property.name}" placeholder="Initial: ${property.value}"></neo-input>`
-	
+
 						y.children[0].inputElement.type = "number"
 						y.children[0].value = property.value.value
 						y.children[0].propertyToSaveTo = property.name
-						y.children[0].addEventListener("input", function() {
+						y.children[0].addEventListener("input", function () {
 							theEntity.properties[this.propertyToSaveTo].value = new LosslessJSON.LosslessNumber(this.value)
 						})
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "ZGameTime": // Number input, specifically for ZGameTime (m_nTicks key of value)
 						var y = document.createElement("div")
 						y.innerHTML = `<neo-input label="${property.name}" placeholder="Initial: ${property.value.m_nTicks}"></neo-input>`
-	
+
 						y.children[0].inputElement.type = "number"
 						y.children[0].value = property.value.value
 						y.children[0].propertyToSaveTo = property.name
-						y.children[0].addEventListener("input", function() {
+						y.children[0].addEventListener("input", function () {
 							theEntity.properties[this.propertyToSaveTo].value.m_nTicks = new LosslessJSON.LosslessNumber(this.value)
 						})
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "bool": // Checkbox input
 						var y = document.createElement("div")
 						y.innerHTML = `<neo-checkbox label="${property.name}"></neo-checkbox>`
-	
+
 						y.children[0].checked = property.value
 						y.children[0].propertyToSaveTo = property.name
-						y.children[0].addEventListener("input", function() {
+						y.children[0].addEventListener("input", function () {
 							theEntity.properties[this.propertyToSaveTo].value = this.checked
 						})
-	
+
 						visualEditor.appendChild(y)
 						break;
-	
+
 					case "SColorRGB":
 					case "SColorRGBA": // Colour picker
 						var x = document.createElement("div")
 						x.innerHTML = property.name
-	
+
 						var y = document.createElement("div")
 						visualEditor.appendChild(x)
 						visualEditor.appendChild(y)
-	
+
 						var picker = Pickr.create({
 							el: y,
 							theme: 'nano', // or 'monolith', or 'nano'
-	
+
 							swatches: [],
-	
+
 							components: {
 								// Main components
 								preview: true,
 								opacity: true,
 								hue: true,
-	
+
 								// Input / output Options
 								interaction: {
 									hex: true,
@@ -1362,30 +1371,30 @@ function displayEntityInSnippetEditor(theEntity) {
 								}
 							}
 						})
-	
+
 						picker.propertyToSaveTo = property.name
 						picker.propertyToSaveToType = property.type == "SColorRGB" ? "rgb" : "rgba"
-	
-						picker.on("save", function(colour, picker) {
+
+						picker.on("save", function (colour, picker) {
 							if (picker.propertyToSaveToType == "rgb") {
 								theEntity.properties[picker.propertyToSaveTo].value = ("#" + colour.toHEXA()[0] + colour.toHEXA()[1] + colour.toHEXA()[2]).toLowerCase()
 							} else {
 								theEntity.properties[picker.propertyToSaveTo].value = ("#" + colour.toHEXA()[0] + colour.toHEXA()[1] + colour.toHEXA()[2] + colour.toHEXA()[3] || "ff").toLowerCase()
 							}
 						})
-	
-						picker.on("init", function(picker) {
+
+						picker.on("init", function (picker) {
 							picker.setColor(theEntity.properties[picker.propertyToSaveTo].value)
 						})
-	
+
 						picker.getRoot().root.classList.add("mb-4")
-	
+
 						break;
-	
+
 					case "ZCurve": // Curve editor
 						var x = document.createElement("div")
 						x.innerHTML = property.name
-	
+
 						var y = document.createElement("div")
 						y.classList.add("w-full")
 						y.innerHTML = `<canvas width="800" height="500" style="cursor: auto;">
@@ -1393,7 +1402,7 @@ function displayEntityInSnippetEditor(theEntity) {
 										</canvas>` // canvas
 						visualEditor.appendChild(x)
 						visualEditor.appendChild(y)
-	
+
 						var curveEditor = new CurveEditor(y.querySelector("canvas"));
 						curveEditor.setEditorState({
 							knots: [],
@@ -1407,74 +1416,74 @@ function displayEntityInSnippetEditor(theEntity) {
 							relevantXMax: 7,
 							gridEnabled: true
 						});
-	
+
 						curveEditor.setFromZCurve(property.value.data)
-	
+
 						curveEditor.align()
-	
+
 						curveEditor.propertyToSaveTo = property.name
-	
-						curveEditor.addEventListener("change", (function() {
-							setTimeout((function() {
+
+						curveEditor.addEventListener("change", (function () {
+							setTimeout((function () {
 								theEntity.properties[this.propertyToSaveTo].value.data = this.getAsZCurve()
 							}).bind(this), 500)
 						}).bind(curveEditor))
-	
+
 						curveEditors.push(curveEditor)
-	
+
 						y.classList.add("mb-4")
 						break;
-	
+
 					default: // String or number input (ignored if neither string nor number). Looks for enums if possible.
 						if (typeof property.value == "string" || property.value.isLosslessNumber) {
 							if (typeof property.value == "string") {
 								if (allEnums[property.type]) {
 									var y = document.createElement("div")
 									y.innerHTML = `<neo-select label="${property.name}">
-													${allEnums[property.type].map(a=>"<option>" + a + "</option>").join("")}
+													${allEnums[property.type].map(a => "<option>" + a + "</option>").join("")}
 													</neo-select><br>`
-	
-									setTimeout((function() {
+
+									setTimeout((function () {
 										var a = ([...this[0].children[0].selectElement.children]).find(b => b.value == this[1].value)
 										a.selected = true
-	
+
 										this[0].children[0].propertyToSaveTo = this[1].name
-										this[0].children[0].addEventListener("input", (function() {
+										this[0].children[0].addEventListener("input", (function () {
 											theEntity.properties[this.propertyToSaveTo].value = this.value
 										}).bind(this[0].children[0]))
 									}).bind([y, property]), 500)
-	
+
 									visualEditor.appendChild(y)
 								} else {
 									var y = document.createElement("div")
 									y.innerHTML = `<neo-input label="${property.name}" placeholder="Initial: ${property.value}"></neo-input>`
-	
+
 									y.children[0].value = property.value
 									y.children[0].propertyToSaveTo = property.name
-									y.children[0].addEventListener("input", function() {
+									y.children[0].addEventListener("input", function () {
 										theEntity.properties[this.propertyToSaveTo].value = this.value
 									})
-	
+
 									visualEditor.appendChild(y)
 								}
 							} else {
 								var y = document.createElement("div")
 								y.innerHTML = `<neo-input label="${property.name}" placeholder="Initial: ${property.value}"></neo-input>`
-	
+
 								y.children[0].inputElement.type = "number"
 								y.children[0].value = property.value.value
 								y.children[0].propertyToSaveTo = property.name
-								y.children[0].addEventListener("input", function() {
+								y.children[0].addEventListener("input", function () {
 									theEntity.properties[this.propertyToSaveTo].value = new LosslessJSON.LosslessNumber(this.value)
 								})
-	
+
 								visualEditor.appendChild(y)
 							}
 						}
 						break;
 				}
 			}
-	
+
 			document.getElementById("visualEditorSpace").innerHTML = ""
 			document.getElementById("visualEditorSpace").appendChild(parentEditor)
 		}
@@ -1492,8 +1501,8 @@ function displayEntityInSnippetEditor(theEntity) {
 		document.getElementById("commentEditorSpace").style.display = "block"
 		autosize.update(document.querySelector("#commentEditorText"))
 	}
-	
-	try { refreshDocs(theEntity) } catch {}
+
+	try { refreshDocs(theEntity) } catch { }
 }
 
 function refreshDocs(theEntity) {
@@ -1508,7 +1517,7 @@ function refreshDocs(theEntity) {
 				let cinfo = minfo.querySelector("classes").querySelector(`class[name="${templateOverrides[theEntity.template] || theEntity.template.replace("[modules:/", "").replace(".class].pc_entitytype", "")}" i]`)
 
 				$("#infoModuleName")[0].innerText = cinfo.attributes.name.value
-				$("#infoModuleBaseClasses")[0].innerText = [...cinfo.querySelector("baseclasses").children].map(a=>a.attributes.type.value).join(", ")
+				$("#infoModuleBaseClasses")[0].innerText = [...cinfo.querySelector("baseclasses").children].map(a => a.attributes.type.value).join(", ")
 
 				$("#infoModuleDocs")[0].innerHTML = ""
 				switch (selectedInfo) {
@@ -1519,13 +1528,13 @@ function refreshDocs(theEntity) {
 							$("#infoModuleDocs")[0].innerHTML += `
 								<div>
 									<span class="text-xl font-normal">${property.attributes.Name.value}</span> ${property.attributes.Type.value}<br>
-									${[...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "INIT") && [...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "INIT").attributes.Value.value != "" ? `<span class="text-lg font-semibold">Initially</span> ${[...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "INIT").attributes.Value.value}<br>` : ''}
-									${[...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "CONSTAFTERSTART") && [...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "CONSTAFTERSTART").attributes.Value.value == "True" ? '<span class="text-lg font-semibold">Constant after start</span><br>' : ''}
-									${[...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "HELPTEXT") && [...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "HELPTEXT").attributes.Value.value != "" ? `<span class="text-sm">${[...property.querySelector("attributes").children].find(a=>a.attributes.Name.value == "HELPTEXT").attributes.Value.value}</span>` : ''}
+									${[...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "INIT") && [...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "INIT").attributes.Value.value != "" ? `<span class="text-lg font-semibold">Initially</span> ${[...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "INIT").attributes.Value.value}<br>` : ''}
+									${[...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "CONSTAFTERSTART") && [...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "CONSTAFTERSTART").attributes.Value.value == "True" ? '<span class="text-lg font-semibold">Constant after start</span><br>' : ''}
+									${[...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "HELPTEXT") && [...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "HELPTEXT").attributes.Value.value != "" ? `<span class="text-sm">${[...property.querySelector("attributes").children].find(a => a.attributes.Name.value == "HELPTEXT").attributes.Value.value}</span>` : ''}
 								</div>
 							`
 						}
-			
+
 						if (properties.length == 3) {
 							$("#infoModuleDocs")[0].style.gridTemplateColumns = "repeat(auto-fill,minmax(33%,1fr))"
 							$("#infoModuleDocs")[0].style.gridAutoColumns = "minmax(33%,1fr)"
@@ -1537,7 +1546,7 @@ function refreshDocs(theEntity) {
 							$("#infoModuleDocs")[0].style.gridAutoColumns = "minmax(80%,1fr)"
 						}
 						break
-					
+
 					case "inputPins":
 						let inputpins = [...cinfo.querySelector("inputpins").children]
 
@@ -1549,7 +1558,7 @@ function refreshDocs(theEntity) {
 								</div>
 							`
 						}
-			
+
 						if (inputpins.length == 3) {
 							$("#infoModuleDocs")[0].style.gridTemplateColumns = "repeat(auto-fill,minmax(33%,1fr))"
 							$("#infoModuleDocs")[0].style.gridAutoColumns = "minmax(33%,1fr)"
@@ -1561,7 +1570,7 @@ function refreshDocs(theEntity) {
 							$("#infoModuleDocs")[0].style.gridAutoColumns = "minmax(80%,1fr)"
 						}
 						break
-					
+
 					case "outputPins":
 						let outputpins = [...cinfo.querySelector("outputpins").children]
 
@@ -1573,7 +1582,7 @@ function refreshDocs(theEntity) {
 								</div>
 							`
 						}
-			
+
 						if (outputpins.length == 3) {
 							$("#infoModuleDocs")[0].style.gridTemplateColumns = "repeat(auto-fill,minmax(33%,1fr))"
 							$("#infoModuleDocs")[0].style.gridAutoColumns = "minmax(33%,1fr)"
@@ -1594,9 +1603,9 @@ function refreshDocs(theEntity) {
 				} else {
 					$("#infoTemplateName")[0].innerText = theEntity.template + "\n"
 				}
-	
+
 				$("#infoTemplateNoDocumentation")[0].innerText = "No documentation"
-	
+
 				$("#infoModule")[0].style.display = "none"
 				$("#infoTemplate")[0].style.display = "block"
 			}
@@ -1672,17 +1681,17 @@ function changeView(view) {
 			$("#entitySubtypeMetadata")[0].value = entity.subType
 			$("#externalScenesMetadata")[0].value = entity.externalScenes
 			break
-		
+
 		case "overrides":
 			document.getElementById("overrideEditorSpace").innerHTML = ""
-			requirejs(['vs/editor/editor.main'], function() {
+			requirejs(['vs/editor/editor.main'], function () {
 				overrideEditor = monaco.editor.create(document.getElementById("overrideEditorSpace"), {
 					value: "",
 					language: "json",
 					roundedSelection: false,
 					theme: "vs-dark"
 				})
-			
+
 				overrideEditor.setValue(beautify(LosslessJSON.stringify({
 					propertyOverrides: entity.propertyOverrides,
 					overrideDeletes: entity.overrideDeletes,
@@ -1711,14 +1720,14 @@ function changeView(view) {
 				monaco.editor.setTheme("shutUpAnthony")
 			})
 			break
-		
+
 		case "graph":
 			refreshGraph()
 			break
 
 		case "pieGraph":
-			if(currentView === view) {
-				document.getElementById('pieGraphFrame').contentWindow.location.reload();				
+			if (currentView === view) {
+				document.getElementById('pieGraphFrame').contentWindow.location.reload();
 			}
 
 			setTimeout(() => {
@@ -1728,14 +1737,14 @@ function changeView(view) {
 				document.getElementById('pieGraphFrame').contentWindow.hashList = hashListAsObject;
 
 				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
-				
+
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
 			}, 1000);
 
 			break;
 		case "pie3DView":
 			//if(currentView === view) {
-				document.getElementById('pie3DViewFrame').contentWindow.location.reload();
+			document.getElementById('pie3DViewFrame').contentWindow.location.reload();
 			// }
 
 			setTimeout(() => {
@@ -1760,36 +1769,36 @@ function refreshGraph() {
 
 	editorGraph = new Graph()
 
-	for (let entry of Object.values(entity.entities).filter(a=>a.type != "comment")) {
+	for (let entry of Object.values(entity.entities).filter(a => a.type != "comment")) {
 		editorGraph.addNode(entry.entityID, { label: entry.name, x: seedrandom(entry.entityID + "x")(), y: seedrandom(entry.entityID + "y")(), size: 5, color: ((entry.name).toLowerCase().includes(editorGraphFilter.toLowerCase()) ? chroma.random().hex() : "#d4d4d4") })
 	}
 
-	for (let entry of editorGraph.nodes().map(a=>[a, entity.entities[a]])) {
+	for (let entry of editorGraph.nodes().map(a => [a, entity.entities[a]])) {
 		if (editorGraphDisplay.includes("pins")) {
 			if (entry[1].events) {
 				for (var pin of entry[1].events) {
 					try {
 						if ((pin.onEvent + "/" + pin.shouldTrigger).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-						editorGraph.addEdge(entry[0], pin.onEntity, { type: "arrow", label: pin.onEvent + "/" + pin.shouldTrigger, size: 2 })
-					} catch {}
+							editorGraph.addEdge(entry[0], pin.onEntity, { type: "arrow", label: pin.onEvent + "/" + pin.shouldTrigger, size: 2 })
+					} catch { }
 				}
 			}
-	
+
 			if (entry[1].inputCopying) {
 				for (var pin of entry[1].inputCopying) {
 					try {
 						if (("Forward " + pin.whenTriggered + "/" + pin.alsoTrigger).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-						editorGraph.addEdge(entry[0], pin.onEntity, { type: "arrow", label: "Forward " + pin.whenTriggered + "/" + pin.alsoTrigger, size: 2 })
-					} catch {}
+							editorGraph.addEdge(entry[0], pin.onEntity, { type: "arrow", label: "Forward " + pin.whenTriggered + "/" + pin.alsoTrigger, size: 2 })
+					} catch { }
 				}
 			}
-	
+
 			if (entry[1].outputCopying) {
 				for (var pin of entry[1].outputCopying) {
 					try {
 						if (("Propagate " + pin.onEvent + "/" + pin.propagateEvent).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-						editorGraph.addEdge(entry[0], pin.onEntity, { type: "arrow", label: "Propagate " + pin.onEvent + "/" + pin.propagateEvent, size: 2 })
-					} catch {}
+							editorGraph.addEdge(entry[0], pin.onEntity, { type: "arrow", label: "Propagate " + pin.onEvent + "/" + pin.propagateEvent, size: 2 })
+					} catch { }
 				}
 			}
 		}
@@ -1800,36 +1809,36 @@ function refreshGraph() {
 					if (getReferencedLocalEntity(property[1].value)) {
 						try {
 							if ((property[0]).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-							editorGraph.addEdge(entry[0], getReferencedLocalEntity(property[1].value), { type: "arrow", label: property[0], size: 2 })
-						} catch {}
+								editorGraph.addEdge(entry[0], getReferencedLocalEntity(property[1].value), { type: "arrow", label: property[0], size: 2 })
+						} catch { }
 					}
 				} else if (property[1].type == "TArray<SEntityTemplateReference>") {
 					for (let value of property[1].value) {
 						if (getReferencedLocalEntity(value)) {
 							try {
 								if ((property[0]).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-								editorGraph.addEdge(entry[0], getReferencedLocalEntity(value), { type: "arrow", label: property[0], size: 2 })
-							} catch {}
+									editorGraph.addEdge(entry[0], getReferencedLocalEntity(value), { type: "arrow", label: property[0], size: 2 })
+							} catch { }
 						}
 					}
 				}
 			}
-	
+
 			for (var property of Object.entries(entry[1].postInitProperties)) {
 				if (property[1].type == "SEntityTemplateReference") {
 					if (getReferencedLocalEntity(property[1].value)) {
 						try {
 							if ((property[0]).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-							editorGraph.addEdge(entry[0], getReferencedLocalEntity(property[1].value), { type: "arrow", label: property[0], size: 2 })
-						} catch {}
+								editorGraph.addEdge(entry[0], getReferencedLocalEntity(property[1].value), { type: "arrow", label: property[0], size: 2 })
+						} catch { }
 					}
 				} else if (property[1].type == "TArray<SEntityTemplateReference>") {
 					for (let value of property[1].value) {
 						if (getReferencedLocalEntity(value)) {
 							try {
 								if ((property[0]).toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-								editorGraph.addEdge(entry[0], getReferencedLocalEntity(value), { type: "arrow", label: property[0], size: 2 })
-							} catch {}
+									editorGraph.addEdge(entry[0], getReferencedLocalEntity(value), { type: "arrow", label: property[0], size: 2 })
+							} catch { }
 						}
 					}
 				}
@@ -1840,8 +1849,8 @@ function refreshGraph() {
 			if (getReferencedLocalEntity(entry[1].parent)) {
 				try {
 					if (("Parent of").toLowerCase().includes(editorGraphEdgeFilter.toLowerCase()))
-					editorGraph.addEdge(getReferencedLocalEntity(entry[1].parent), entry[0], { type: "arrow", label: "Parent of", size: 2 })
-				} catch {}
+						editorGraph.addEdge(getReferencedLocalEntity(entry[1].parent), entry[0], { type: "arrow", label: "Parent of", size: 2 })
+				} catch { }
 			}
 		}
 	}
@@ -1898,7 +1907,7 @@ function refreshGraph() {
 							confirmButtonText: 'OK',
 							allowOutsideClick: false
 						})).value
-			
+
 						if (entity.entities[editorGraphDraggedNode][property][propertyName] && entity.entities[editorGraphDraggedNode][property][propertyName].type == "TArray<SEntityTemplateReference>") {
 							entity.entities[editorGraphDraggedNode][property][propertyName].value.push(editorGraphMousedOverNode)
 						} else {
@@ -1909,7 +1918,7 @@ function refreshGraph() {
 						}
 
 						break;
-					
+
 					case "event":
 						let event = (await Swal.fire({
 							title: 'Event',
@@ -1927,14 +1936,14 @@ function refreshGraph() {
 							confirmButtonText: 'OK',
 							allowOutsideClick: false
 						})).value
-			
+
 						entity.entities[editorGraphDraggedNode].events.push({
 							onEvent: event[0],
 							shouldTrigger: event[1],
 							onEntity: editorGraphMousedOverNode
 						})
 						break;
-					
+
 					case "inputCopy":
 						let inputCopy = (await Swal.fire({
 							title: 'Input Copy',
@@ -1952,14 +1961,14 @@ function refreshGraph() {
 							confirmButtonText: 'OK',
 							allowOutsideClick: false
 						})).value
-			
+
 						entity.entities[editorGraphDraggedNode].inputCopying.push({
 							whenTriggered: inputCopy[0],
 							alsoTrigger: inputCopy[1],
 							onEntity: editorGraphMousedOverNode
 						})
 						break;
-					
+
 					case "outputCopy":
 						let outputCopy = (await Swal.fire({
 							title: 'Output Copy',
@@ -1977,7 +1986,7 @@ function refreshGraph() {
 							confirmButtonText: 'OK',
 							allowOutsideClick: false
 						})).value
-			
+
 						entity.entities[editorGraphDraggedNode].outputCopying.push({
 							onEvent: outputCopy[0],
 							propagateEvent: outputCopy[1],
@@ -1988,7 +1997,7 @@ function refreshGraph() {
 
 				editorGraphRenderer.camera.enable()
 				editorGraphDraggedNode = false
-		
+
 				refreshGraph()
 			} else {
 				let entityID = "abcd" + genRandHex(12)
@@ -2022,7 +2031,7 @@ function refreshGraph() {
 		}
 	})
 
-	editorGraphForceLayout = new FA2Layout(editorGraph, {settings: forceAtlas2.inferSettings(editorGraph)})
+	editorGraphForceLayout = new FA2Layout(editorGraph, { settings: forceAtlas2.inferSettings(editorGraph) })
 	editorGraphForceLayout.start()
 }
 
@@ -2071,7 +2080,7 @@ async function saveEntity(saveAs = false) {
 		"e4x": false,
 		"indent_empty_lines": false
 	}))
-	
+
 	for (let entry of Object.keys(entity.entities)) {
 		entity.entities[entry].entityID = entry
 	}
@@ -2136,7 +2145,7 @@ async function checkEditorJSONValidity() {
 	} catch {
 		document.querySelector("#entityValidityData")["_x_dataStack"][0].valid = false
 		document.querySelector("#entityValidityData")["_x_dataStack"][0].reason = "Invalid JSON"
-		
+
 		return false
 	}
 
@@ -2348,11 +2357,10 @@ async function generateOverrideDeletes() {
 	}))
 }
 
-function deployMods()
-{
+function deployMods() {
 	function sanitise(html) {
 		return sanitizeHtml(html, {
-			allowedTags: [ 'b', 'i', 'em', 'strong', 'br']
+			allowedTags: ['b', 'i', 'em', 'strong', 'br']
 		});
 	}
 
@@ -2376,16 +2384,16 @@ function deployMods()
 				let hasClosed = false;
 
 				const deployProcessClosed = () => {
-					if(hasClosed) return;
+					if (hasClosed) return;
 					hasClosed = true;
 
 					if (fullOutput.includes("Deployed all mods successfully.")) {
 						Swal.close()
-					
+
 						showMessage("Deployed successfully", "Successfully deployed. You can now play the game with mods!", "success")
 					} else {
 						Swal.close()
-					
+
 						showMessage("Error in deployment", "<i>" + sanitise(fullOutput.split("\n").slice(fullOutput.endsWith("\n") ? -2 : -1)[0]) + "</i>", "error")
 					}
 				}
@@ -2396,7 +2404,7 @@ function deployMods()
 
 				let output = ""
 				let fullOutput = ""
-			
+
 				deployProcess.stdout.on("data", (data) => {
 					output += String(data)
 					fullOutput += String(data)
@@ -2411,7 +2419,7 @@ function deployMods()
 						deployProcessClosed()
 					}
 				})
-				
+
 				deployProcess.on("exit", () => deployProcessClosed())
 			}, 500)
 		},
@@ -2422,7 +2430,6 @@ function deployMods()
 	})
 }
 
-function runGame()
-{
+function runGame() {
 	spawn(path.join(RunGamePath, 'offline.cmd'), [], { cwd: RunGamePath });
 }

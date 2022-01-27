@@ -183,8 +183,27 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
                     entity.properties.m_mTransform.value.rotation.z.value
                 ] }));
             }
-            else if(property === 'cover_plane')
+            else if(property === 'draw_volume')
             {
+                let size = [.1, .1, .1];
+
+                if(entity.template === '[modules:/zcoverplane.class].pc_entitytype')
+                {
+                    size = [
+                        entity.properties.m_fCoverLength.value.value,
+                        entity.properties.m_fCoverDepth.value.value,
+                        entity.properties.m_eCoverSize.value === 'eLowCover' ? 1 : 2
+                    ];
+                }
+                else if(!!entity.properties.m_vGlobalSize)
+                {
+                    size = [
+                        entity.properties.m_vGlobalSize.value.x.value,
+                        entity.properties.m_vGlobalSize.value.y.value,
+                        entity.properties.m_vGlobalSize.value.z.value
+                    ];
+                }
+
                 socket.send(JSON.stringify({ type: 'cover_plane', entityId: id, positions: [
                     entity.properties.m_mTransform.value.position.x.value,
                     entity.properties.m_mTransform.value.position.y.value,
@@ -193,11 +212,7 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
                     entity.properties.m_mTransform.value.rotation.x.value,
                     entity.properties.m_mTransform.value.rotation.y.value,
                     entity.properties.m_mTransform.value.rotation.z.value
-                ], size: [
-                    entity.properties.m_fCoverLength.value.value,
-                    entity.properties.m_fCoverDepth.value.value,
-                    entity.properties.m_eCoverSize.value === 'eLowCover' ? 1 : 2
-                ]
+                ], size
             }));
             } 
         }
