@@ -93,6 +93,11 @@ function createWorld(scene) {
                 break;
         }
 
+        if (!createdObject && !!entity.properties.m_mTransform) {
+            createdObject = createWorldObject(entityID, createProp(entity));
+            transformedTemplate.type = 'UnknownEntity';
+        }
+
         if (createdObject) {
             if (!worldObjectsByType[transformedTemplate.type]) worldObjectsByType[transformedTemplate.type] = [];
             worldObjectsByType[transformedTemplate.type].push(createdObject);

@@ -128,20 +128,17 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
 
         const message = JSON.parse(event.data);
 
-        if(message.type === 'Pin')
-        {
+        if (message.type === 'Pin') {
             const node = cy.getElementById(`${message.qeID}_${message.pinName}`);
             const edges = node.connectedEdges();
             node.addClass('fired-event');
             edges.addClass('fired-event');
             setTimeout(() => { node.removeClass('fired-event'); edges.removeClass('fired-event'); }, 1000);
         }
-        else if (message.type === 'HeroPosition')
-        {
+        else if (message.type === 'GetHeroPosition') {
             console.log(message);
 
-            if(transformToUpdateOnReturnMessage && window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage]?.properties?.m_mTransform)
-            {
+            if (transformToUpdateOnReturnMessage && window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage]?.properties?.m_mTransform) {
                 window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage].properties.m_mTransform.value.position.x.value = message.x;
                 window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage].properties.m_mTransform.value.position.y.value = message.y;
                 window.externallyLoadedModel.entities[transformToUpdateOnReturnMessage].properties.m_mTransform.value.position.z.value = message.z;
@@ -155,11 +152,10 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         const id = requestedID || window.ctxTarget.data('id').split('_')[0];
         const entity = window.externallyLoadedModel.entities[id];
 
-        if(entity)
-        {
+        if (entity) {
             socket.send(JSON.stringify({ type: 'highlight', entityId: id }));
         }
-        
+
         closeContextMenu();
     }
 
@@ -169,34 +165,30 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
 
         externalEditorTree.select_node(id);
 
-        if(entity)
-        {
-            if(property === 'position')
-            {
-                socket.send(JSON.stringify({ type: 'update_position', entityId: id, positions: [
-                    entity.properties.m_mTransform.value.position.x.value,
-                    entity.properties.m_mTransform.value.position.y.value,
-                    entity.properties.m_mTransform.value.position.z.value
-                ], rotations: [
-                    entity.properties.m_mTransform.value.rotation.x.value,
-                    entity.properties.m_mTransform.value.rotation.y.value,
-                    entity.properties.m_mTransform.value.rotation.z.value
-                ] }));
-            }
-            else if(property === 'draw_volume')
-            {
+        if (entity) {
+            if (property === 'position') {
+                socket.send(JSON.stringify({
+                    type: 'update_position', entityId: id, positions: [
+                        entity.properties.m_mTransform.value.position.x.value,
+                        entity.properties.m_mTransform.value.position.y.value,
+                        entity.properties.m_mTransform.value.position.z.value
+                    ], rotations: [
+                        entity.properties.m_mTransform.value.rotation.x.value,
+                        entity.properties.m_mTransform.value.rotation.y.value,
+                        entity.properties.m_mTransform.value.rotation.z.value
+                    ]
+                }));
+            } else if (property === 'draw_volume') {
                 let size = [.1, .1, .1];
 
-                if(entity.template === '[modules:/zcoverplane.class].pc_entitytype')
-                {
+                if (entity.template === '[modules:/zcoverplane.class].pc_entitytype') {
                     size = [
                         entity.properties.m_fCoverLength.value.value,
                         entity.properties.m_fCoverDepth.value.value,
                         entity.properties.m_eCoverSize.value === 'eLowCover' ? 1 : 2
                     ];
                 }
-                else if(!!entity.properties.m_vGlobalSize)
-                {
+                else if (!!entity.properties.m_vGlobalSize) {
                     size = [
                         entity.properties.m_vGlobalSize.value.x.value,
                         entity.properties.m_vGlobalSize.value.y.value,
@@ -204,24 +196,37 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
                     ];
                 }
 
-                socket.send(JSON.stringify({ type: 'cover_plane', entityId: id, positions: [
-                    entity.properties.m_mTransform.value.position.x.value,
-                    entity.properties.m_mTransform.value.position.y.value,
-                    entity.properties.m_mTransform.value.position.z.value
-                ], rotations: [
-                    entity.properties.m_mTransform.value.rotation.x.value,
-                    entity.properties.m_mTransform.value.rotation.y.value,
-                    entity.properties.m_mTransform.value.rotation.z.value
-                ], size
-            }));
-            } 
+                socket.send(JSON.stringify({
+                    type: 'cover_plane', entityId: id, positions: [
+                        entity.properties.m_mTransform.value.position.x.value,
+                        entity.properties.m_mTransform.value.position.y.value,
+                        entity.properties.m_mTransform.value.position.z.value
+                    ], rotations: [
+                        entity.properties.m_mTransform.value.rotation.x.value,
+                        entity.properties.m_mTransform.value.rotation.y.value,
+                        entity.properties.m_mTransform.value.rotation.z.value
+                    ], size
+                }));
+            } else if (property === 'set_hero_position') {
+                socket.send(JSON.stringify({
+                    type: 'set_hero_position', entityId: id, positions: [
+                        entity.properties.m_mTransform.value.position.x.value,
+                        entity.properties.m_mTransform.value.position.y.value,
+                        entity.properties.m_mTransform.value.position.z.value
+                    ], rotations: [
+                        entity.properties.m_mTransform.value.rotation.x.value,
+                        entity.properties.m_mTransform.value.rotation.y.value,
+                        entity.properties.m_mTransform.value.rotation.z.value
+                    ]
+                }));
+            }
         }
-        
+
         closeContextMenu();
     }
 
     window.requestPosition = (idToChange) => {
-        socket.send(JSON.stringify({ type: 'hero_position' }));
+        socket.send(JSON.stringify({ type: 'get_hero_position' }));
         transformToUpdateOnReturnMessage = idToChange;
         closeContextMenu();
     }

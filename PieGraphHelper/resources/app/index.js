@@ -14,7 +14,7 @@ function loadServer(shouldLog, callback) {
     function onMessageRecieved(msg) {
         if(msg.startsWith('I_') || msg.startsWith('O_'))
             DoPin(msg);
-        else if (msg.startsWith('HeroPosition'))
+        else if (msg.startsWith('GetHeroPosition'))
         {
             const [ msgType, x, y, z] = msg.split('_');
             requestedPins.mostRecent.send(JSON.stringify({ type: msgType, x, y, z }))
@@ -119,9 +119,14 @@ function loadServer(shouldLog, callback) {
                     if(currentGameConnectionInfo)
                         gameServer.send(`C_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}_${message.size.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
-                case 'hero_position':
+                case 'get_hero_position':
                     if(currentGameConnectionInfo)
-                        gameServer.send(`HeroPosition`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);  
+                        gameServer.send(`GetHeroPosition`, currentGameConnectionInfo.port, currentGameConnectionInfo.address); 
+                    break;
+                case 'set_hero_position':
+                    if(currentGameConnectionInfo)
+                        gameServer.send(`SetHeroPosition_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                    break;
             }
         });
     });

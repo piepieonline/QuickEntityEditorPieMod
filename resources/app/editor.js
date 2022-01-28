@@ -225,20 +225,19 @@ function pasteNode(b) {
 function contextMenu(b, c) {
 	function createGameCommsMenu() {
 		const commsItems = {};
-		
+
 		const selectedEntity = entity.entities[b.id];
 
-		if(!selectedEntity) return commsItems;
+		if (!selectedEntity) return commsItems;
 
 		const hasTransform = !!selectedEntity.properties.m_mTransform;
 		const isCoverplane = selectedEntity.template === '[modules:/zcoverplane.class].pc_entitytype';
 		const hasVolumeBox = !!selectedEntity.properties.m_vGlobalSize;
 
-		if (hasTransform || isCoverplane || hasVolumeBox)
-		{
+		if (hasTransform || isCoverplane || hasVolumeBox) {
 			let label = 'Highlight';
-			if(isCoverplane) label = 'Show cover plane';
-			if(hasVolumeBox) label = 'Show volume box';
+			if (isCoverplane) label = 'Show cover plane';
+			if (hasVolumeBox) label = 'Show volume box';
 
 			commsItems.highlight = {
 				separator_before: !1,
@@ -249,7 +248,7 @@ function contextMenu(b, c) {
 					let d = editorTree.get_node(b.reference);
 
 					try {
-						if(isCoverplane || hasVolumeBox)
+						if (isCoverplane || hasVolumeBox)
 							document.getElementById('pieGraphFrame').contentWindow.updateInGame('draw_volume', d.id);
 						else
 							document.getElementById('pieGraphFrame').contentWindow.highlightInGame(d.id);
@@ -288,6 +287,23 @@ function contextMenu(b, c) {
 
 					try {
 						document.getElementById('pieGraphFrame').contentWindow.requestPosition(d.id);
+					}
+					catch { }
+				}
+			};
+
+		if (hasTransform)
+			commsItems.setHeroToPosition = {
+				separator_before: !1,
+				icon: !1,
+				_disabled: !1,
+				separator_after: !1,
+				label: "Set hero to transform position",
+				action: function (b) {
+					let d = editorTree.get_node(b.reference);
+
+					try {
+						document.getElementById('pieGraphFrame').contentWindow.updateInGame('set_hero_position', d.id);
 					}
 					catch { }
 				}
