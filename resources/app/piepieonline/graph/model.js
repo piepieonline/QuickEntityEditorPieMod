@@ -222,7 +222,9 @@ function createModel(entityToProcess, MAX_NODE_COUNT, ignoredEntityIds)
 
             if (externallyLoadedReferences && externallyLoadedReferences[nodesToProcess[0]]) {
                 externallyLoadedReferences[nodesToProcess[0]].forEach(referencingEntity => {
+                    const referenceProperty = referencingEntity.type.split(' ')[1]; // "Property: m_eidParent"
                     // if(referencingEntity.type.includes('Event:'))
+                    if(!propsToIgnore.includes(referenceProperty))
                     {
                         checkAndAddToProcessList(referencingEntity.id);
                     }
@@ -277,4 +279,5 @@ const entitiesToIgnore = [
 ]
 
 const propsToIgnore = [
+    'm_eidParent'
 ]
