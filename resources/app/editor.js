@@ -52,6 +52,8 @@ editorGraphForceLayout = { kill: () => { } } // good programming
 var hashList = String(fs.readFileSync("hash_list.txt")).split("\n").map(a => { return { path: a.split(",")[1], hash: a.split(",")[0] } }).slice(3)
 var hashListAsObject = Object.fromEntries(hashList.map(a => [a.hash, a.path]))
 
+var knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\propExtract\\temp\\knownProps.json")))
+
 const XMLParser = new DOMParser()
 
 const allModules = fs.existsSync("modules") ? fs.readdirSync("modules").map(a => XMLParser.parseFromString(String(fs.readFileSync("modules/" + a)), "text/xml").querySelector("moduleinfo")) : []
@@ -419,6 +421,40 @@ function contextMenu(b, c) {
 			label: "Game Comms",
 			action: !1,
 			submenu: createGameCommsMenu()
+		},
+		showHelp: {
+			separator_before: !1,
+			icon: !1,
+			separator_after: !1,
+			_disabled: !1,
+			label: "Show help",
+			action: function (b) {
+				let d = editorTree.get_node(b.reference);
+				const template = hashListAsObject[entity.entities[d.id].template] || entity.entities[d.id].template;
+				console.log(knownProps[template]);
+
+				let messageText = '<span style="text-align: left"><b>Properties:</b><br />';
+				for(prop in knownProps[template].p)
+					messageText += `&nbsp;&nbsp;${prop}: ${knownProps[template].p[prop]}<br />`;
+
+				messageText += '<b>Input Pins:</b><br />';
+				for(pin in knownProps[template].i)
+					messageText += `&nbsp;&nbsp;${pin}<br />`;
+
+				messageText += '<b>Output Pins:</b><br />';
+				for(pin in knownProps[template].o)
+					messageText += `&nbsp;&nbsp;${pin}<br />`;
+
+				messageText += '</span>'
+
+				Swal.fire({
+					showConfirmButton: true,
+					allowEnterKey: true,
+					title: `${template} Properties`,
+					html: messageText,
+					grow: 'row'
+				});
+			}
 		},
 	}
 }
