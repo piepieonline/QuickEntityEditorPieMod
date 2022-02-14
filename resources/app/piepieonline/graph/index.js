@@ -172,6 +172,7 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
                     type: 'update_property',
                     entityId: id,
                     property: propName,
+                    propertyType: entity.properties[propName].type,
                     value: convertToSocketProperty(entity.properties[propName] || entity.postInitProperties[propName])
                 }));
             } else if (property === 'position') {
@@ -311,20 +312,19 @@ function convertToSocketProperty(property)
 {
     switch(property.type)
     {
-        case 'bool':
-        case 'float32':
-            return property.value;
         case 'SMatrix43':
             const positions = [
-                entity.properties.m_mTransform.value.position.x.value,
-                entity.properties.m_mTransform.value.position.y.value,
-                entity.properties.m_mTransform.value.position.z.value
+                property.value.position.x.value,
+                property.value.position.y.value,
+                property.value.position.z.value
             ];
             const rotations = [
-                entity.properties.m_mTransform.value.rotation.x.value,
-                entity.properties.m_mTransform.value.rotation.y.value,
-                entity.properties.m_mTransform.value.rotation.z.value
+                property.value.rotation.x.value,
+                property.value.rotation.y.value,
+                property.value.rotation.z.value
             ];
             return `${positions.join('|')}|${rotations.join('|')}`;
-    }
+        default:
+            return property.value.value || property.value;
+        }
 }

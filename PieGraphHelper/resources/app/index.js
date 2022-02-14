@@ -130,7 +130,7 @@ function loadServer(shouldLog, callback) {
                 case 'update_property':
                     console.log(message.entityId)
                     if(currentGameConnectionInfo)
-                        gameServer.send(`UpdateProperty|${new Decimal("0x" + message.entityId).toFixed()}|${message.property}|${message.value}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                        gameServer.send(`UpdateProperty|${new Decimal("0x" + message.entityId).toFixed()}|${message.property}|${message.propertyType}|${message.value}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
             }
         });
