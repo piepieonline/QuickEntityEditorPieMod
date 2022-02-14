@@ -52,4 +52,4 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 
 ## Source
 * This repo
-* LogPins.dll: 
+* LogPins.dll: https://github.com/piepieonline/ZHMModSDK/tree/master/Mods/LogPins/Src
