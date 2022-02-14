@@ -75,7 +75,7 @@ function PieMonacoExtensions(snippetEditor) {
 
             if(entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName]))
             {
-                alert(`Updating ${propertyName} of ${entityId}`);
+                console.log(`Updating ${propertyName} of ${entityId}`);
 
                 try {
                     if(propertyName === 'm_mTransform')
