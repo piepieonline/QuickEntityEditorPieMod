@@ -644,6 +644,8 @@ function createSnippetEditor() {
 			roundedSelection: false,
 			theme: "vs-dark"
 		})
+
+		pieExtensions.PieMonacoExtensions(snippetEditor);
 	})
 }
 

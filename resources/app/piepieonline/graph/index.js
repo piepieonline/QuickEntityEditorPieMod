@@ -166,7 +166,15 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         externalEditorTree.select_node(id);
 
         if (entity) {
-            if (property === 'position') {
+            if (property.split('_')[0] === 'property') {
+                const propName = property.substring(9);
+                socket.send(JSON.stringify({
+                    type: 'update_property',
+                    entityId: id,
+                    property: propName,
+                    value: convertToSocketProperty(entity.properties[propName] || entity.postInitProperties[propName])
+                }));
+            } else if (property === 'position') {
                 socket.send(JSON.stringify({
                     type: 'update_position', entityId: id, positions: [
                         entity.properties.m_mTransform.value.position.x.value,
@@ -297,4 +305,26 @@ function ctxAddToIgnore(target) {
 
 
     closeContextMenu();
+}
+
+function convertToSocketProperty(property)
+{
+    switch(property.type)
+    {
+        case 'bool':
+        case 'float32':
+            return property.value;
+        case 'SMatrix43':
+            const positions = [
+                entity.properties.m_mTransform.value.position.x.value,
+                entity.properties.m_mTransform.value.position.y.value,
+                entity.properties.m_mTransform.value.position.z.value
+            ];
+            const rotations = [
+                entity.properties.m_mTransform.value.rotation.x.value,
+                entity.properties.m_mTransform.value.rotation.y.value,
+                entity.properties.m_mTransform.value.rotation.z.value
+            ];
+            return `${positions.join('|')}|${rotations.join('|')}`;
+    }
 }

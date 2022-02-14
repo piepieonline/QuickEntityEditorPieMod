@@ -1,3 +1,5 @@
+const LosslessJSON = require("lossless-json")
+
 var knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\extractedData\\knownProps.json")))
 
 function createSchema(template) {
@@ -61,6 +63,37 @@ function PieJSONSchema(monaco, template) {
     });
 }
 
+function PieMonacoExtensions(snippetEditor) {
+    snippetEditor.addAction({
+        id: 'update-property-ingame',
+        label: 'Update property in-game',
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: .1,
+        run: function (ed) {
+            const propertyName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
+            const entityId = LosslessJSON.parse(snippetEditor.getValue()).entityID;
+
+            if(entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName]))
+            {
+                alert(`Updating ${propertyName} of ${entityId}`);
+
+                try {
+                    if(propertyName === 'm_mTransform')
+                    {
+                        document.getElementById('pieGraphFrame').contentWindow.updateInGame('position', entityId);
+                    }
+                    else
+                    {
+                        document.getElementById('pieGraphFrame').contentWindow.updateInGame('property_' + propertyName, entityId);
+                    }
+                }
+                catch { }
+            }
+        }
+    })
+}
+
 module.exports = {
-    PieJSONSchema
+    PieJSONSchema,
+    PieMonacoExtensions
 };

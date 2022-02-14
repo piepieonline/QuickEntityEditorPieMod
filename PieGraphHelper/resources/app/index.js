@@ -107,17 +107,17 @@ function loadServer(shouldLog, callback) {
                 case 'highlight':
                     console.log(message.entityId)
                     if(currentGameConnectionInfo)
-                        gameServer.send(`H_${new Decimal("0x" + message.entityId).toFixed()}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                        gameServer.send(`H|${new Decimal("0x" + message.entityId).toFixed()}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
                 case 'update_position':
                     console.log(message.entityId)
                     if(currentGameConnectionInfo)
-                        gameServer.send(`P_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                        gameServer.send(`P|${new Decimal("0x" + message.entityId).toFixed()}|${message.positions.join('|')}|${message.rotations.join('|')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
                 case 'cover_plane':
                     console.log(message.entityId)
                     if(currentGameConnectionInfo)
-                        gameServer.send(`C_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}_${message.size.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                        gameServer.send(`C|${new Decimal("0x" + message.entityId).toFixed()}|${message.positions.join('|')}|${message.rotations.join('|')}|${message.size.join('|')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
                 case 'get_hero_position':
                     if(currentGameConnectionInfo)
@@ -125,7 +125,12 @@ function loadServer(shouldLog, callback) {
                     break;
                 case 'set_hero_position':
                     if(currentGameConnectionInfo)
-                        gameServer.send(`SetHeroPosition_${new Decimal("0x" + message.entityId).toFixed()}_${message.positions.join('_')}_${message.rotations.join('_')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                        gameServer.send(`SetHeroPosition|${new Decimal("0x" + message.entityId).toFixed()}|${message.positions.join('|')}|${message.rotations.join('|')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+                    break;
+                case 'update_property':
+                    console.log(message.entityId)
+                    if(currentGameConnectionInfo)
+                        gameServer.send(`UpdateProperty|${new Decimal("0x" + message.entityId).toFixed()}|${message.property}|${message.value}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
             }
         });
