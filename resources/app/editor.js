@@ -31,6 +31,7 @@ const defaultRPKGLoadPath = 'G:\\EpicGames\\HITMAN3\\Runtime';
 let defaultEntitySavePath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\Mods\\AIActionChanger\\content\\chunk27';
 const SimpleModFrameworkPath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\';
 const RunGamePath = 'G:\\EpicGames\\HITMAN3\\';
+const pieExtensions = require('./piepieonline/editorExtensions');
 
 shouldSort = true
 editorGraphDisplay = ["pins"]
@@ -52,7 +53,7 @@ editorGraphForceLayout = { kill: () => { } } // good programming
 var hashList = String(fs.readFileSync("hash_list.txt")).split("\n").map(a => { return { path: a.split(",")[1], hash: a.split(",")[0] } }).slice(3)
 var hashListAsObject = Object.fromEntries(hashList.map(a => [a.hash, a.path]))
 
-var knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\propExtract\\temp\\knownProps.json")))
+var knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\extractedData\\knownProps.json")))
 
 const XMLParser = new DOMParser()
 
@@ -851,6 +852,8 @@ async function selectionUpdate(e, data) {
 					}))
 					monaco.editor.setTheme("vs-dark")
 					monaco.editor.setTheme("shutUpAnthony")
+					
+					pieExtensions.PieJSONSchema(monaco, hashListAsObject[entity.entities[currentlySelected].template] || entity.entities[currentlySelected].template);
 				}
 
 				var needsRefresh = false
@@ -1018,6 +1021,8 @@ function displayEntityInSnippetEditor(theEntity) {
 			}))
 			monaco.editor.setTheme("vs-dark")
 			monaco.editor.setTheme("shutUpAnthony")
+
+			pieExtensions.PieJSONSchema(monaco, hashListAsObject[theEntity.template] || theEntity.template);
 
 			var x = `
 				<div>
