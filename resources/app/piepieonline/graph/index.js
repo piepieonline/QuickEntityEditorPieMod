@@ -336,6 +336,7 @@ function convertToSocketProperty(property)
             ];
             socketProperty.value = `${positions.join('|')}|${rotations.join('|')}`;
         case 'Guid':
+            socketProperty.value = (property.value.value || property.value).toUpperCase();
         default:
             socketProperty.value = property.value.value || property.value;
     }
