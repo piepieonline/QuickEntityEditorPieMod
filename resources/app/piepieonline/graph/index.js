@@ -172,8 +172,7 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
                     type: 'update_property',
                     entityId: id,
                     property: propName,
-                    propertyType: entity.properties[propName].type,
-                    value: convertToSocketProperty(entity.properties[propName] || entity.postInitProperties[propName])
+                    ...convertToSocketProperty(entity.properties[propName] || entity.postInitProperties[propName])
                 }));
             } else if (property === 'position') {
                 socket.send(JSON.stringify({
@@ -310,6 +309,18 @@ function ctxAddToIgnore(target) {
 
 function convertToSocketProperty(property)
 {
+    if(window.allEnums[property.type])
+    {
+        return {
+            propertyType: 'enum',
+            value: window.allEnums[property.type].indexOf(property.value)
+        };
+    }
+
+    const socketProperty = {
+        propertyType: property.type
+    };
+
     switch(property.type)
     {
         case 'SMatrix43':
@@ -323,8 +334,11 @@ function convertToSocketProperty(property)
                 property.value.rotation.y.value,
                 property.value.rotation.z.value
             ];
-            return `${positions.join('|')}|${rotations.join('|')}`;
+            socketProperty.value = `${positions.join('|')}|${rotations.join('|')}`;
+        case 'Guid':
         default:
-            return property.value.value || property.value;
-        }
+            socketProperty.value = property.value.value || property.value;
+    }
+
+    return socketProperty;
 }

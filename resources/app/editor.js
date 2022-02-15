@@ -1794,6 +1794,7 @@ function changeView(view) {
 				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedReferences = reverseReferences;
 				document.getElementById('pieGraphFrame').contentWindow.externalEditorTree = editorTree;
 				document.getElementById('pieGraphFrame').contentWindow.hashList = hashListAsObject;
+				document.getElementById('pieGraphFrame').contentWindow.allEnums = allEnums;
 
 				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
 
