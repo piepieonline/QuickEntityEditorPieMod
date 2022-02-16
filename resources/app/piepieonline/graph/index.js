@@ -163,8 +163,6 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         const id = requestedID || window.ctxTarget.data('id').split('_')[0];
         const entity = window.externallyLoadedModel.entities[id];
 
-        externalEditorTree.select_node(id);
-
         if (entity) {
             if (property.split('_')[0] === 'property') {
                 const propName = property.substring(9);
@@ -335,8 +333,16 @@ function convertToSocketProperty(property)
                 property.value.rotation.z.value
             ];
             socketProperty.value = `${positions.join('|')}|${rotations.join('|')}`;
+            break;
         case 'Guid':
             socketProperty.value = (property.value.value || property.value).toUpperCase();
+            break;
+        case 'SEntityTemplateReference':
+            socketProperty.value = new window.Decimal("0x" + property.value).toFixed();
+            break;
+        case 'TArray<SEntityTemplateReference>':
+            socketProperty.value = `${property.value.length}|${property.value.map(ref => new window.Decimal("0x" + ref).toFixed()).join('|')}`;
+            break;
         default:
             socketProperty.value = property.value.value || property.value;
     }

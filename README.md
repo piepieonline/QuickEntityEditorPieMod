@@ -35,6 +35,18 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 2. Select another entity, and select your first entity again.
 3. Right click the property name, and click 'Update Property in-game'
 
+*Note*: Only some property types can be updated, and not all will actually reflect in-game (TBD What about loading after changing?)
+
+Properties that currently work are:
+* bool
+* int32
+* enum
+* float32
+* ZGuid
+* SColorRGB
+* SMatrix43
+* SEntityTemplateReference
+
 ### Set the position in QNE to 47's current position
 1. Right click the entity in the tree view.
 2. Select 'Game Comms' > 'Set transform to hero position'

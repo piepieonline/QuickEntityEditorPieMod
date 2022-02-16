@@ -73,10 +73,10 @@ function PieMonacoExtensions(snippetEditor) {
             const propertyName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
             const entityId = LosslessJSON.parse(snippetEditor.getValue()).entityID;
 
+            if (entity.entities[entityId]) { entity.entities[entityId] = LosslessJSON.parse(snippetEditor.getValue()) }
+
             if(entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName]))
             {
-                console.log(`Updating ${propertyName} of ${entityId}`);
-
                 try {
                     if(propertyName === 'm_mTransform')
                     {

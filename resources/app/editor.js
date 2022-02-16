@@ -24,6 +24,7 @@ const { Sigma } = require("sigma")
 const forceAtlas2 = require("graphology-layout-forceatlas2");
 const FA2Layout = require("graphology-layout-forceatlas2/worker")
 const chroma = require("chroma-js")
+const Decimal = require('decimal.js').Decimal
 
 const ExpectedQuickEntityVersion = 2.1
 
@@ -260,23 +261,6 @@ function contextMenu(b, c) {
 				}
 			};
 		}
-
-		if (hasTransform)
-			commsItems.updatePosition = {
-				separator_before: !1,
-				icon: !1,
-				_disabled: !1,
-				separator_after: !1,
-				label: "Update Position",
-				action: function (b) {
-					let d = editorTree.get_node(b.reference);
-
-					try {
-						document.getElementById('pieGraphFrame').contentWindow.updateInGame('position', d.id);
-					}
-					catch { }
-				}
-			};
 
 		if (hasTransform)
 			commsItems.setToHeroPosition = {
@@ -1795,7 +1779,8 @@ function changeView(view) {
 				document.getElementById('pieGraphFrame').contentWindow.externalEditorTree = editorTree;
 				document.getElementById('pieGraphFrame').contentWindow.hashList = hashListAsObject;
 				document.getElementById('pieGraphFrame').contentWindow.allEnums = allEnums;
-
+				
+				document.getElementById('pieGraphFrame').contentWindow.Decimal = Decimal;
 				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
 
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
