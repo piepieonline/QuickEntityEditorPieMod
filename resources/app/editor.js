@@ -418,6 +418,12 @@ function contextMenu(b, c) {
 				const template = hashListAsObject[entity.entities[d.id].template] || entity.entities[d.id].template;
 				console.log(knownProps[template]);
 
+				if(!knownProps[template])
+				{
+					console.warn(`Unknown template: ${template}`);
+					return;
+				}
+
 				let messageText = '<span style="text-align: left"><b>Properties:</b><br />';
 				for(prop in knownProps[template].p)
 					messageText += `&nbsp;&nbsp;${prop}: ${knownProps[template].p[prop]}<br />`;
