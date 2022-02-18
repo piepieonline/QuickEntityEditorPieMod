@@ -13,7 +13,7 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 
 ## Installation instructions
 1. Find your QNE installation, and delete the `temp` folder
-2. Copy the entire QNE folder, so you should have `QuickEntityEditor` and `PieQNE` next to each other
+2. Copy the entire QNE folder as `PieQNE`, so you should have `QuickEntityEditor` and `PieQNE` next to each other
 3. Download the files from https://drive.google.com/file/d/1QMPoJuvMFnYSGIQGTv-U2ZaWfjyzS4SZ/view?usp=sharing and copy them into the `PieQNE` folder. You should now have `PieQNE\PieGraphHelper\electron.exe` contained within.
 4. Go to https://github.com/piepieonline/QuickEntityEditorPieMod, click the green "Code" button, "Download Zip"
 5. Copy it into the `PieQNE` folder, saying yes to overwriting.
@@ -55,6 +55,37 @@ Properties that currently work are:
 1. Right click the entity in the tree view.
 2. Select 'Game Comms' > 'Highlight'
 
+### Watch pins occur in realtime
+1. Click the entity with the event you care about in Tree View
+2. Open Pie Graph View
+3. In-game, press ` and click 'Enable Pins'
+
+## Uncommon usage
+### Moving random entities
+If you want to move a random entity (That doesn't have a pin, nor is it referenced by one), there is a workaround:
+1. Create a new entity:
+```json
+{
+    "name": "zmultiparentspatialentity",
+    "template": "[modules:/zmultiparentspatialentity.class].pc_entitytype",
+    "blueprint": "[modules:/zmultiparentspatialentity.class].pc_entityblueprint",
+    "properties": {
+        "m_aParents": {
+            "type": "TArray<SEntityTemplateReference>",
+            "value": ["<YOUR ENTITY ID>"]
+        }
+    }
+}
+```
+2. In a pin that you will trigger:
+```json
+{
+    "onEvent": "OnStart",
+    "shouldTrigger": "GetIndex",
+    "onEntity": "<zmultiparentspatialentity ID>"
+}
+```
+3. Redeploy and launch the game. Once the pin has triggered, you should be able to interact with the entity as per normal.
 
 ## Troubleshooting
 ### 'A Javascript error occurred in the main process'
