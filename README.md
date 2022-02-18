@@ -28,7 +28,6 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 1. Launch `PieQNE\QuickEntityEditor.exe`, `PieQNE\QuickEntityEditorPieExt.bat` and Hitman (Note: QNE can run multiple times, but 'QuickEntityEditorPieExt.bat' can only run one instance!)
 2. Allow Electron through windows firewall (it's local only, but it's how the game and QNE communicate)
 3. In Hitman, press '`' to open the mod console, and enable 'LogPins'
-4. In QNE, open the entity you are editing, click 'Pie Graph View', then back to 'Tree View'
 
 ### Updating properties (Including positions)
 1. Select the entity in the tree view, change the value you care about in the text view.

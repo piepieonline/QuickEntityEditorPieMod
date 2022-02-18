@@ -4,6 +4,8 @@ const Decimal = require('decimal.js').Decimal
 const udp = require('dgram');
 const { WebSocketServer } = require('ws');
 
+let lastGamePing = 0;
+
 function loadServer(shouldLog, callback) {
     var knownPins = JSON.parse(String(fs.readFileSync("./resources/app/knownPins.json")))
 
@@ -19,6 +21,11 @@ function loadServer(shouldLog, callback) {
             const [ msgType, x, y, z] = msg.split('_');
             requestedPins.mostRecent.send(JSON.stringify({ type: msgType, x, y, z }))
             console.log('sent ' + msgType);
+        }
+        else if (msg.startsWith('Ping'))
+        {
+            lastGamePing = Date.now();
+            requestedPins.mostRecent.send(JSON.stringify({ type: 'PingGame' }))
         }
     }
 
@@ -95,14 +102,30 @@ function loadServer(shouldLog, callback) {
 
     flowchartServer.on('connection', function connection(ws) {
         ws.on('message', function message(data) {
-            console.log('received: ', data.toString());
-
             const message = JSON.parse(data.toString());
+
+            if(message.type !== 'ping')
+                console.log('received: ', data.toString());
+
             switch (message.type) {
                 case 'register':
                     console.log(message.requestedPins)
                     requestedPins = message.requestedPins.reduce((prev, val) => { prev[val] = ws; return prev; }, {});
                     requestedPins.mostRecent = ws;
+                    break;
+                case 'ping':
+                    if(!currentGameConnectionInfo)
+                    {
+                        requestedPins.mostRecent.send(JSON.stringify({ type: 'PingIntermediary' }));
+                        break;
+                    }
+                    
+                    gameServer.send('Ping', currentGameConnectionInfo.port, currentGameConnectionInfo.address);
+
+                    if(lastGamePing < (Date.now() - 5000))
+                    {
+                        requestedPins.mostRecent.send(JSON.stringify({ type: 'PingIntermediary' }));
+                    }
                     break;
                 case 'highlight':
                     console.log(message.entityId)

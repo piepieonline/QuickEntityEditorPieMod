@@ -28,11 +28,14 @@ const Decimal = require('decimal.js').Decimal
 
 const ExpectedQuickEntityVersion = 2.1
 
+// Start Pie Extensions
 const defaultRPKGLoadPath = 'G:\\EpicGames\\HITMAN3\\Runtime';
 let defaultEntitySavePath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\Mods\\AIActionChanger\\content\\chunk27';
 const SimpleModFrameworkPath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\';
 const RunGamePath = 'G:\\EpicGames\\HITMAN3\\';
-const pieExtensions = require('./piepieonline/editorExtensions');
+const pieEditorExtensions = require('./piepieonline/editorExtensions');
+const pieServerExtensions = require('./piepieonline/gameServer');
+// End Pie Extensions
 
 shouldSort = true
 editorGraphDisplay = ["pins"]
@@ -227,6 +230,10 @@ function pasteNode(b) {
 }
 
 function contextMenu(b, c) {
+	function closeContextMenu() {
+		// document.getElementById('context-menu').classList.remove('open');
+	}
+
 	function createGameCommsMenu() {
 		const commsItems = {};
 
@@ -251,13 +258,12 @@ function contextMenu(b, c) {
 				action: function (b) {
 					let d = editorTree.get_node(b.reference);
 
-					try {
-						if (isCoverplane || hasVolumeBox)
-							document.getElementById('pieGraphFrame').contentWindow.updateInGame('draw_volume', d.id);
-						else
-							document.getElementById('pieGraphFrame').contentWindow.highlightInGame(d.id);
-					}
-					catch { }
+					if (isCoverplane || hasVolumeBox)
+						pieServerExtensions.UpdateInGame('draw_volume', d.id || window.ctxTarget.data('id').split('_')[0]);
+					else
+						pieServerExtensions.HighlightInGame(d.id || window.ctxTarget.data('id').split('_')[0]);
+
+					closeContextMenu();
 				}
 			};
 		}
@@ -272,10 +278,8 @@ function contextMenu(b, c) {
 				action: function (b) {
 					let d = editorTree.get_node(b.reference);
 
-					try {
-						document.getElementById('pieGraphFrame').contentWindow.requestPosition(d.id);
-					}
-					catch { }
+					pieServerExtensions.RequestPosition(d.id || window.ctxTarget.data('id').split('_')[0]);
+					closeContextMenu();
 				}
 			};
 
@@ -289,10 +293,8 @@ function contextMenu(b, c) {
 				action: function (b) {
 					let d = editorTree.get_node(b.reference);
 
-					try {
-						document.getElementById('pieGraphFrame').contentWindow.updateInGame('set_hero_position', d.id);
-					}
-					catch { }
+					pieServerExtensions.UpdateInGame('set_hero_position', d.id || window.ctxTarget.data('id').split('_')[0]);
+					closeContextMenu();
 				}
 			};
 
@@ -614,6 +616,8 @@ async function loadEditor() {
 	currentlySelected = false
 
 	refreshEditor()
+
+	pieServerExtensions.ConnectServer();
 }
 
 function createSnippetEditor() {
@@ -635,7 +639,7 @@ function createSnippetEditor() {
 			theme: "vs-dark"
 		})
 
-		pieExtensions.PieMonacoExtensions(snippetEditor);
+		pieEditorExtensions.PieMonacoExtensions(snippetEditor);
 	})
 }
 
@@ -845,7 +849,7 @@ async function selectionUpdate(e, data) {
 					monaco.editor.setTheme("vs-dark")
 					monaco.editor.setTheme("shutUpAnthony")
 					
-					pieExtensions.PieJSONSchema(monaco, hashListAsObject[entity.entities[currentlySelected].template] || entity.entities[currentlySelected].template);
+					pieEditorExtensions.PieJSONSchema(monaco, hashListAsObject[entity.entities[currentlySelected].template] || entity.entities[currentlySelected].template);
 				}
 
 				var needsRefresh = false
@@ -1014,7 +1018,7 @@ function displayEntityInSnippetEditor(theEntity) {
 			monaco.editor.setTheme("vs-dark")
 			monaco.editor.setTheme("shutUpAnthony")
 
-			pieExtensions.PieJSONSchema(monaco, hashListAsObject[theEntity.template] || theEntity.template);
+			pieEditorExtensions.PieJSONSchema(monaco, hashListAsObject[theEntity.template] || theEntity.template);
 
 			var x = `
 				<div>
@@ -1788,6 +1792,7 @@ function changeView(view) {
 				
 				document.getElementById('pieGraphFrame').contentWindow.Decimal = Decimal;
 				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
+				document.getElementById('pieGraphFrame').contentWindow.RegisterPinListener = pieServerExtensions.RegisterPinListener;
 
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
 			}, 1000);
