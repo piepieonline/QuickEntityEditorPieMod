@@ -1,5 +1,6 @@
 const Decimal = require('decimal.js').Decimal;
 
+const qnePort = 47275;
 const msBetweenKeepAlive = 1500;
 
 let socket;
@@ -18,7 +19,7 @@ function ConnectServer()
     entities = entity.entities;
     enumList = allEnums;
 
-    socket = new WebSocket('ws://localhost:27016');
+    socket = new WebSocket(`ws://localhost:${qnePort}`);
 
     // Connection opened
     socket.addEventListener('open', function (event) {

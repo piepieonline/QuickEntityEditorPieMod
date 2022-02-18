@@ -4,6 +4,9 @@ const Decimal = require('decimal.js').Decimal
 const udp = require('dgram');
 const { WebSocketServer } = require('ws');
 
+const gamePort = 37275;
+const qnePort = 47275;
+
 let lastGamePing = 0;
 
 function loadServer(shouldLog, callback) {
@@ -59,7 +62,7 @@ function loadServer(shouldLog, callback) {
 
     // creating a udp server
     const gameServer = udp.createSocket('udp4');
-    const flowchartServer = new WebSocketServer({ port: 27016 });
+    const flowchartServer = new WebSocketServer({ port: qnePort });
 
     // emits when any error occurs
     gameServer.on('error', function (error) {
@@ -71,11 +74,9 @@ function loadServer(shouldLog, callback) {
     gameServer.on('listening', function () {
         var address = gameServer.address();
         var port = address.port;
-        var family = address.family;
         var ipaddr = address.address;
-        console.log('gameServer is listening at port' + port);
-        console.log('gameServer ip :' + ipaddr);
-        console.log('gameServer is IP4/IP6 : ' + family);
+        console.log('gameServer is listening at port: ' + port);
+        console.log('gameServer ip:' + ipaddr);
     });
 
     //emits after the socket is closed using socket.close();
@@ -164,7 +165,7 @@ function loadServer(shouldLog, callback) {
         var logger = fs.createWriteStream('./temp/serverLogPinMapping.json', { flags: 'a' });
     }
 
-    gameServer.bind(27015);
+    gameServer.bind(gamePort);
 
     console.log('Servers booted');
 }
