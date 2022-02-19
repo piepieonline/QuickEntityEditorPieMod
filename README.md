@@ -7,6 +7,7 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 * Highlighting pin events as they happen in QNE, to allow for easier debugging
 
 |![Before](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before")|![Updating](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating")|![After](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After")|
+| --- | --- | --- |
 
 ## Requirements
 * Hitman 3
@@ -93,9 +94,9 @@ If you want to move a random entity (That doesn't have a pin, nor is it referenc
 3. Redeploy and launch the game. Once the pin has triggered, you should be able to interact with the entity as per normal.
 
 ## Troubleshooting
-### 'A Javascript error occurred in the main process'
-* You are attempting to run `PieQNE\QuickEntityEditorPieExt.bat` multiple times - make sure it's only running once
-
+### An entity property won't change
+* Try highlighting the entity - if this doesn't work, check that the entity is has output pins or is referenced
+* Move away and return to the entity - especially for enums, sometimes they need to be retrigger to update correctly
 
 ## Source
 * This repo
