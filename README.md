@@ -6,9 +6,7 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 * Providing a JSON schema of known properties and events in the tree view text editor. This also allows for autocomplete.
 * Highlighting pin events as they happen in QNE, to allow for easier debugging
 
-![Before](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before") |
-![Updating](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating") |
-![After](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After")
+|![Before](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before")|![Updating](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating")|![After](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After")|
 
 ## Requirements
 * Hitman 3
