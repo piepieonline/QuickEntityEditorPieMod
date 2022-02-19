@@ -27,15 +27,11 @@ const chroma = require("chroma-js")
 
 const ExpectedQuickEntityVersion = 2.1
 
-// Start Pie Extensions
+// Start Pie Extensions imports
 const Decimal = require('decimal.js').Decimal
-const knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\extractedData\\knownProps.json")))
 
-const defaultRPKGLoadPath = 'G:\\EpicGames\\HITMAN3\\Runtime';
-let defaultEntitySavePath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\Mods\\AIActionChanger\\content\\chunk27';
-const SimpleModFrameworkPath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\';
-const RunGamePath = 'G:\\EpicGames\\HITMAN3\\';
 const pieEditorExtensions = require('./piepieonline/editorExtensions');
+const pieTreeViewExtensions = require('./piepieonline/treeViewExtensions');
 const pieServerExtensions = require('./piepieonline/gameServer');
 // End Pie Extensions
 
@@ -230,77 +226,6 @@ function pasteNode(b) {
 }
 
 function contextMenu(b, c) {
-	function closeContextMenu() {
-		// document.getElementById('context-menu').classList.remove('open');
-	}
-
-	function createGameCommsMenu() {
-		const commsItems = {};
-
-		const selectedEntity = entity.entities[b.id];
-
-		if (!selectedEntity) return commsItems;
-
-		const hasTransform = !!selectedEntity.properties.m_mTransform;
-		const isCoverplane = selectedEntity.template === '[modules:/zcoverplane.class].pc_entitytype';
-		const hasVolumeBox = !!selectedEntity.properties.m_vGlobalSize;
-
-		if (hasTransform || isCoverplane || hasVolumeBox) {
-			let label = 'Highlight';
-			if (isCoverplane) label = 'Show cover plane';
-			if (hasVolumeBox) label = 'Show volume box';
-
-			commsItems.highlight = {
-				separator_before: !1,
-				icon: !1,
-				separator_after: !1,
-				label,
-				action: function (b) {
-					let d = editorTree.get_node(b.reference);
-
-					if (isCoverplane || hasVolumeBox)
-						pieServerExtensions.UpdateInGame('draw_volume', d.id || window.ctxTarget.data('id').split('_')[0]);
-					else
-						pieServerExtensions.HighlightInGame(d.id || window.ctxTarget.data('id').split('_')[0]);
-
-					closeContextMenu();
-				}
-			};
-		}
-
-		if (hasTransform)
-			commsItems.setToHeroPosition = {
-				separator_before: !1,
-				icon: !1,
-				_disabled: !1,
-				separator_after: !1,
-				label: "Set transform to hero position",
-				action: function (b) {
-					let d = editorTree.get_node(b.reference);
-
-					pieServerExtensions.RequestPosition(d.id || window.ctxTarget.data('id').split('_')[0]);
-					closeContextMenu();
-				}
-			};
-
-		if (hasTransform)
-			commsItems.setHeroToPosition = {
-				separator_before: !1,
-				icon: !1,
-				_disabled: !1,
-				separator_after: !1,
-				label: "Set hero to transform position",
-				action: function (b) {
-					let d = editorTree.get_node(b.reference);
-
-					pieServerExtensions.UpdateInGame('set_hero_position', d.id || window.ctxTarget.data('id').split('_')[0]);
-					closeContextMenu();
-				}
-			};
-
-		return commsItems;
-	}
-
 	return {
 		create: {
 			separator_before: !1,
@@ -401,54 +326,7 @@ function contextMenu(b, c) {
 				electron.clipboard.writeText(d.id)
 			}
 		},
-		gameComms: {
-			separator_before: !0,
-			icon: !1,
-			separator_after: !1,
-			label: "Game Comms",
-			action: !1,
-			submenu: createGameCommsMenu()
-		},
-		showHelp: {
-			separator_before: !1,
-			icon: !1,
-			separator_after: !1,
-			_disabled: !1,
-			label: "Show help",
-			action: function (b) {
-				let d = editorTree.get_node(b.reference);
-				const template = hashListAsObject[entity.entities[d.id].template] || entity.entities[d.id].template;
-				console.log(knownProps[template]);
-
-				if(!knownProps[template])
-				{
-					console.warn(`Unknown template: ${template}`);
-					return;
-				}
-
-				let messageText = '<span style="text-align: left"><b>Properties:</b><br />';
-				for(prop in knownProps[template].p)
-					messageText += `&nbsp;&nbsp;${prop}: ${knownProps[template].p[prop]}<br />`;
-
-				messageText += '<b>Input Pins:</b><br />';
-				for(pin in knownProps[template].i)
-					messageText += `&nbsp;&nbsp;${pin}<br />`;
-
-				messageText += '<b>Output Pins:</b><br />';
-				for(pin in knownProps[template].o)
-					messageText += `&nbsp;&nbsp;${pin}<br />`;
-
-				messageText += '</span>'
-
-				Swal.fire({
-					showConfirmButton: true,
-					allowEnterKey: true,
-					title: `${template} Properties`,
-					html: messageText,
-					grow: 'row'
-				});
-			}
-		},
+		...pieTreeViewExtensions.InitialisePieTreeExtensions(b.id),
 	}
 }
 
@@ -459,8 +337,10 @@ async function inspectBrick() {
 			buttonLabel: "Select",
 			filters: [{ name: 'RPKG files', extensions: ['rpkg'] }],
 			properties: ["openFile", "dontAddToRecent"],
-			defaultPath: defaultRPKGLoadPath
+			defaultPath: localStorage.getItem('defaultRPKGPath') || ''
 		})[0]
+
+		localStorage.setItem('defaultRPKGPath', path.dirname(rpkgPath));
 
 		var rpkgPath2 = electron.remote.dialog.showOpenDialogSync({
 			title: "Select the RPKG to extract the TBLU from",
@@ -2108,11 +1988,11 @@ async function saveEntity(saveAs = false) {
 			buttonLabel: "Save",
 			filters: [{ name: 'JSON file', extensions: ['json'] }],
 			properties: [],
-			defaultPath: defaultEntitySavePath
-		})
+			defaultPath: localStorage.getItem('defaultEntitySavePath') || process.cwd()
+		});
 	}
 
-	defaultEntitySavePath = currentlyOpenedEntity;
+	localStorage.setItem('defaultEntitySavePath', path.dirname(currentlyOpenedEntity));
 
 	let savedEntity = LosslessJSON.stringify(entity)
 	let sizeOfEntity = new TextEncoder().encode(savedEntity).length
@@ -2169,7 +2049,7 @@ async function saveEntityAsPatch() {
 		buttonLabel: "Save",
 		filters: [{ name: 'JSON file', extensions: ['json'] }],
 		properties: [],
-		defaultPath: defaultEntitySavePath
+		defaultPath: localStorage.getItem('defaultEntitySavePath') || process.cwd()
 	}))
 
 	fs.unlinkSync("./temp1.json")

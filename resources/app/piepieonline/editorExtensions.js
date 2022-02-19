@@ -1,8 +1,7 @@
 const LosslessJSON = require("lossless-json")
 
 const pieServerExtensions = require('./gameServer');
-
-var knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\extractedData\\knownProps.json")))
+const { knownProps } = require('./extractedData/knownProps');
 
 function createSchema(template) {
     const schemaTemplate = {
