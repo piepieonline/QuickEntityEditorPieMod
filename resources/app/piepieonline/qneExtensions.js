@@ -30,7 +30,7 @@ function Initialise() {
     if(config.addPieGraph)
         addNewAction('pieGraph', 'Pie Graph View', 'fa-project-diagram', './piepieonline/graph/index.html');
     if(config.addPie3DView)
-        addNewAction('pie3DView', 'Pie 3D View', 'fa-project-diagram', './piepieonline/3dview/index.html');
+        addNewAction('pie3DView', 'Pie 3D View', 'fa-cubes', './piepieonline/3dview/index.html');
 }
 
 function ChangeView(view) {
