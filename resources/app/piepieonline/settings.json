@@ -1,6 +1,7 @@
 {
-    "reorderGraph": false,
+    "autoConnectToServer": true,
     "addPieGraph": true,
     "addPie3DView": false,
-    "enableInDevelopmentFeatures": false
+    "enableInDevelopmentFeatures": false,
+    "reorderGraph": false
 }

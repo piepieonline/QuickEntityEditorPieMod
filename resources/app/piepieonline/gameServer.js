@@ -1,6 +1,8 @@
 const child_process = require('child_process');
 const Decimal = require('decimal.js').Decimal;
 
+const settings = require('./settings.json');
+
 const qnePort = 47275;
 const msBetweenKeepAlive = 1500;
 const msToWaitForServerReady = 750;
@@ -20,7 +22,10 @@ function Initialise() {
     entities = entity.entities;
     enumList = allEnums;
 
-    connectToServer();
+    updateServerStatus(false, false);
+
+    if(settings.autoConnectToServer)
+        connectToServer();
 }
 
 function launchAndConnect()

@@ -1,4 +1,4 @@
-const settings = require('settings.json');
+const settings = require('./settings.json');
 const knownProps = require('./extractedData/knownProps.json');
 
 function InitialisePieTreeExtensions(selectedId)

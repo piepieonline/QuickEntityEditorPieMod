@@ -4,7 +4,7 @@
 resources/app/*
 !resources/app/piepieonline
 !resources/app/piepieonline**
-!resources/app/editor.*
+!resources/app/editor.js
 resources/app/piepieonline/3dview/extractedParents/*
 resources/app/piepieonline/propExtract/**/*
 resources/app/piepieonline/graphHelper2/**/*
