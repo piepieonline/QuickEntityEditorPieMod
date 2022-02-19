@@ -117,14 +117,6 @@
 					<i class="far fa-save col-span-1"></i>
 					<span class="col-span-7">Save Patch</span>
 				</div>
-				<div class="p-4 my-1 bg-gray-700 cursor-pointer grid grid-cols-8 gap-2 items-center" onclick="deployMods()" @keyup.window.prevent.ctrl.alt.s="deployMods()">
-					<i class="far fa-save col-span-1"></i>
-					<span class="col-span-7">Deploy</span>
-				</div>
-				<div class="p-4 my-1 bg-gray-700 cursor-pointer grid grid-cols-8 gap-2 items-center" onclick="runGame()" @keyup.window.prevent.ctrl.alt.s="runGame()">
-					<i class="far fa-save col-span-1"></i>
-					<span class="col-span-7">Run</span>
-				</div>
 				<div class="p-4 my-1 bg-gray-700 cursor-pointer grid grid-cols-8 gap-2 items-center" onclick="generateOverrideDeletes()" x-effect="$el.style.display = selectedView == 'overrides' ? 'grid' : 'none'">
 					<i class="far fa-trash-alt col-span-1"></i>
 					<span class="col-span-7">Delete Entities From Scene</span>

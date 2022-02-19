@@ -13,7 +13,7 @@ const LosslessJSON = require("lossless-json")
 const { create } = require("domain")
 const beautify = require('js-beautify').js
 const Swal = require("sweetalert2")
-const { spawn, execSync } = require("child_process")
+const { execSync } = require("child_process")
 const isEqual = require('lodash.isequal')
 const seedrandom = require('seedrandom')
 const { toast } = require('tailwind-toast')
@@ -24,11 +24,13 @@ const { Sigma } = require("sigma")
 const forceAtlas2 = require("graphology-layout-forceatlas2");
 const FA2Layout = require("graphology-layout-forceatlas2/worker")
 const chroma = require("chroma-js")
-const Decimal = require('decimal.js').Decimal
 
 const ExpectedQuickEntityVersion = 2.1
 
 // Start Pie Extensions
+const Decimal = require('decimal.js').Decimal
+const knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\extractedData\\knownProps.json")))
+
 const defaultRPKGLoadPath = 'G:\\EpicGames\\HITMAN3\\Runtime';
 let defaultEntitySavePath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\Mods\\AIActionChanger\\content\\chunk27';
 const SimpleModFrameworkPath = 'D:\\Game Modding\\Hitman\\2021 Tools\\SimpleModFramework\\';
@@ -56,8 +58,6 @@ editorGraphForceLayout = { kill: () => { } } // good programming
 
 var hashList = String(fs.readFileSync("hash_list.txt")).split("\n").map(a => { return { path: a.split(",")[1], hash: a.split(",")[0] } }).slice(3)
 var hashListAsObject = Object.fromEntries(hashList.map(a => [a.hash, a.path]))
-
-var knownProps = JSON.parse(String(fs.readFileSync("resources\\app\\piepieonline\\extractedData\\knownProps.json")))
 
 const XMLParser = new DOMParser()
 
@@ -2411,81 +2411,4 @@ async function generateOverrideDeletes() {
 		"e4x": false,
 		"indent_empty_lines": false
 	}))
-}
-
-function deployMods() {
-	function sanitise(html) {
-		return sanitizeHtml(html, {
-			allowedTags: ['b', 'i', 'em', 'strong', 'br']
-		});
-	}
-
-	function showMessage(title, message, icon) {
-		Swal.fire({
-			showConfirmButton: false,
-			allowEnterKey: true,
-			title: title,
-			html: message,
-			icon: icon
-		})
-	}
-
-	Swal.fire({
-		title: 'Deploying your mods',
-		html: 'Grab a coffee or something - your enabled mods are being applied to the game.<br><br><i></i>',
-		didOpen: async () => {
-			Swal.showLoading()
-
-			setTimeout(() => {
-				let hasClosed = false;
-
-				const deployProcessClosed = () => {
-					if (hasClosed) return;
-					hasClosed = true;
-
-					if (fullOutput.includes("Deployed all mods successfully.")) {
-						Swal.close()
-
-						showMessage("Deployed successfully", "Successfully deployed. You can now play the game with mods!", "success")
-					} else {
-						Swal.close()
-
-						showMessage("Error in deployment", "<i>" + sanitise(fullOutput.split("\n").slice(fullOutput.endsWith("\n") ? -2 : -1)[0]) + "</i>", "error")
-					}
-				}
-
-				let deployProcess = spawn(path.join(SimpleModFrameworkPath, 'Deploy.exe'), ["consoleLog"], { // any arguments will disable nicer logging
-					cwd: SimpleModFrameworkPath
-				})
-
-				let output = ""
-				let fullOutput = ""
-
-				deployProcess.stdout.on("data", (data) => {
-					output += String(data)
-					fullOutput += String(data)
-
-					console.log(output);
-
-					output = output.split("\n").slice(output.endsWith("\n") ? -2 : -1)[0]
-
-					Swal.getHtmlContainer().querySelector('i').textContent = output.split("\n").slice(output.endsWith("\n") ? -2 : -1)[0]
-
-					if (fullOutput.includes("Deployed all mods successfully.")) {
-						deployProcessClosed()
-					}
-				})
-
-				deployProcess.on("exit", () => deployProcessClosed())
-			}, 500)
-		},
-		allowEnterKey: false,
-		allowOutsideClick: false,
-		allowEscapeKey: false,
-		showConfirmButton: false
-	})
-}
-
-function runGame() {
-	spawn(path.join(RunGamePath, 'offline.cmd'), [], { cwd: RunGamePath });
 }

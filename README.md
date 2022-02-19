@@ -6,10 +6,17 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 * Providing a JSON schema of known properties and events in the tree view text editor. This also allows for autocomplete.
 * Highlighting pin events as they happen in QNE, to allow for easier debugging
 
+![Before](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before") |
+![Updating](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating") |
+![After](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After")
+
 ## Requirements
 * Hitman 3
 * QuickEntityEditor (aka QNE): https://discord.com/channels/555224628251852811/815577522958893096/909406748140511263
 * ZHMModSDK: https://github.com/OrfeasZ/ZHMModSDK/releases
+
+## Caveats
+* This will only work on entities that have either fired a pin, or have been referenced by one - see 'Moving random entities' below for deployment-time workaround
 
 ## Installation instructions
 1. Find your QNE installation, and delete the `temp` folder
