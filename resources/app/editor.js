@@ -617,7 +617,7 @@ async function loadEditor() {
 
 	refreshEditor()
 
-	pieServerExtensions.ConnectServer();
+	pieServerExtensions.Initialise();
 }
 
 function createSnippetEditor() {

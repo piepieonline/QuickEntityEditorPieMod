@@ -12,7 +12,7 @@ let lastGamePing = 0;
 function loadServer(shouldLog, callback) {
     var knownPins = JSON.parse(String(fs.readFileSync("./resources/app/knownPins.json")))
 
-    var requestedPins;
+    var requestedPins = {};
 
     let currentGameConnectionInfo;
 
@@ -28,7 +28,6 @@ function loadServer(shouldLog, callback) {
         else if (msg.startsWith('Ping'))
         {
             lastGamePing = Date.now();
-            requestedPins.mostRecent.send(JSON.stringify({ type: 'PingGame' }))
         }
     }
 
@@ -105,19 +104,20 @@ function loadServer(shouldLog, callback) {
         ws.on('message', function message(data) {
             const message = JSON.parse(data.toString());
 
-            if(message.type !== 'ping')
+            if(message.type !== 'ping') {
                 console.log('received: ', data.toString());
+                requestedPins.mostRecent = ws;
+            }
 
             switch (message.type) {
                 case 'register':
                     console.log(message.requestedPins)
                     requestedPins = message.requestedPins.reduce((prev, val) => { prev[val] = ws; return prev; }, {});
-                    requestedPins.mostRecent = ws;
                     break;
                 case 'ping':
                     if(!currentGameConnectionInfo)
                     {
-                        requestedPins.mostRecent.send(JSON.stringify({ type: 'PingIntermediary' }));
+                        ws.send(JSON.stringify({ type: 'PingIntermediary' }));
                         break;
                     }
                     
@@ -125,7 +125,11 @@ function loadServer(shouldLog, callback) {
 
                     if(lastGamePing < (Date.now() - 5000))
                     {
-                        requestedPins.mostRecent.send(JSON.stringify({ type: 'PingIntermediary' }));
+                        ws.send(JSON.stringify({ type: 'PingIntermediary' }));
+                    }
+                    else
+                    {
+                        ws.send(JSON.stringify({ type: 'PingGame' }))
                     }
                     break;
                 case 'highlight':

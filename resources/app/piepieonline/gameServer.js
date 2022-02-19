@@ -1,7 +1,9 @@
+const child_process = require('child_process');
 const Decimal = require('decimal.js').Decimal;
 
 const qnePort = 47275;
 const msBetweenKeepAlive = 1500;
+const msToWaitForServerReady = 750;
 
 let socket;
 let socketIsOpen;
@@ -13,13 +15,27 @@ let enumList;
 
 let pinListener;
 
-function ConnectServer()
-{
+function Initialise() {
     // Set references to QNE variables
     entities = entity.entities;
     enumList = allEnums;
 
+    connectToServer();
+}
+
+function launchAndConnect()
+{
+    child_process.exec('start /D .\\PieGraphHelper\\ cmd.exe /K node .\\resources\\app\\index.js');
+
+    setTimeout(() => {
+        connectToServer();
+    }, msToWaitForServerReady);
+}
+
+function connectToServer()
+{
     socket = new WebSocket(`ws://localhost:${qnePort}`);
+    socketIsOpen = false;
 
     // Connection opened
     socket.addEventListener('open', function (event) {
@@ -28,32 +44,32 @@ function ConnectServer()
         RegisterPinListener([], null);
 
         let pingInterval = setInterval(() => {
-            if(!socketIsOpen) {
+            if (!socketIsOpen) {
                 clearInterval(pingInterval);
             }
 
-            try
-            {
+            try {
                 socket.send(JSON.stringify({ type: 'ping' }));
-            } catch {}
+            } catch { }
         }, msBetweenKeepAlive);
     });
 
     socket.addEventListener('close', function (event) {
+        if(!socketIsOpen) launchAndConnect();
         socketIsOpen = false;
         updateServerStatus(false, false);
     });
 
     // Listen for messages
     socket.addEventListener('message', function (event) {
-        
+
         const message = JSON.parse(event.data);
 
-        if(!message.type.startsWith('Ping'))
+        if (!message.type.startsWith('Ping'))
             console.log('Message from server ', event.data);
 
         if (message.type === 'Pin') {
-            if(pinListener) pinListener(message);
+            if (pinListener) pinListener(message);
         }
         else if (message.type === 'GetHeroPosition') {
             console.log(message);
@@ -72,8 +88,7 @@ function ConnectServer()
     });
 }
 
-function RegisterPinListener(requestedPins, pinListenerCallback)
-{
+function RegisterPinListener(requestedPins, pinListenerCallback) {
     socket.send(JSON.stringify({ type: 'register', requestedPins }));
     pinListener = pinListenerCallback;
 }
@@ -160,10 +175,8 @@ function RequestPosition(idToChange) {
     transformToUpdateOnReturnMessage = idToChange;
 }
 
-function updateServerStatus(serverConnected, gameConnected)
-{
-    if(!eleServerStatus)
-    {
+function updateServerStatus(serverConnected, gameConnected) {
+    if (!eleServerStatus) {
         eleServerStatus = document.createElement('div');
         eleServerStatus.style.position = 'absolute';
         eleServerStatus.style.top = '5px';
@@ -171,7 +184,7 @@ function updateServerStatus(serverConnected, gameConnected)
         eleServerStatus.style['font-size'] = '20px';
         eleServerStatus.style['text-align'] = 'right';
         eleServerStatus.onclick = () => {
-            if(!socketIsOpen) ConnectServer();
+            if (!socketIsOpen) connectToServer();
         }
 
         document.body.appendChild(eleServerStatus);
@@ -180,10 +193,8 @@ function updateServerStatus(serverConnected, gameConnected)
     eleServerStatus.innerHTML = `Server: ${serverConnected ? '<span style="color: green; font-weight: bold;">✓</span>' : '<span style="color: red; font-weight: bold;">☓</span>'}<br />Game: ${gameConnected ? '<span style="color: green; font-weight: bold;">✓</span>' : '<span style="color: red; font-weight: bold;">☓</span>'}${serverConnected ? '' : '<br />Click to connect'}`;
 }
 
-function convertToSocketProperty(property)
-{
-    if(enumList[property.type])
-    {
+function convertToSocketProperty(property) {
+    if (enumList[property.type]) {
         return {
             propertyType: 'enum',
             value: enumList[property.type].indexOf(property.value)
@@ -194,8 +205,7 @@ function convertToSocketProperty(property)
         propertyType: property.type
     };
 
-    switch(property.type)
-    {
+    switch (property.type) {
         case 'SMatrix43':
             const positions = [
                 property.value.position.x.value,
@@ -226,7 +236,7 @@ function convertToSocketProperty(property)
 }
 
 module.exports = {
-    ConnectServer,
+    Initialise,
     RegisterPinListener,
     HighlightInGame,
     UpdateInGame,
