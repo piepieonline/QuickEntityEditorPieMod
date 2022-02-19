@@ -1,7 +1,7 @@
 const LosslessJSON = require("lossless-json")
 
 const pieServerExtensions = require('./gameServer');
-const { knownProps } = require('./extractedData/knownProps');
+const knownProps = require('./extractedData/knownProps.json');
 
 function createSchema(template) {
     const schemaTemplate = {

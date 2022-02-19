@@ -28,8 +28,7 @@ const chroma = require("chroma-js")
 const ExpectedQuickEntityVersion = 2.1
 
 // Start Pie Extensions imports
-const Decimal = require('decimal.js').Decimal
-
+const pieQneExtensions = require('./piepieonline/qneExtensions');
 const pieEditorExtensions = require('./piepieonline/editorExtensions');
 const pieTreeViewExtensions = require('./piepieonline/treeViewExtensions');
 const pieServerExtensions = require('./piepieonline/gameServer');
@@ -497,6 +496,7 @@ async function loadEditor() {
 
 	refreshEditor()
 
+	pieQneExtensions.Initialise();
 	pieServerExtensions.Initialise();
 }
 
@@ -1658,41 +1658,9 @@ function changeView(view) {
 			refreshGraph()
 			break
 
-		case "pieGraph":
-			if (currentView === view) {
-				document.getElementById('pieGraphFrame').contentWindow.location.reload();
-			}
-
-			setTimeout(() => {
-				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedModel = entity;
-				document.getElementById('pieGraphFrame').contentWindow.externallyLoadedReferences = reverseReferences;
-				document.getElementById('pieGraphFrame').contentWindow.externalEditorTree = editorTree;
-				document.getElementById('pieGraphFrame').contentWindow.hashList = hashListAsObject;
-				document.getElementById('pieGraphFrame').contentWindow.allEnums = allEnums;
-				
-				document.getElementById('pieGraphFrame').contentWindow.Decimal = Decimal;
-				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
-				document.getElementById('pieGraphFrame').contentWindow.RegisterPinListener = pieServerExtensions.RegisterPinListener;
-
-				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
-			}, 1000);
-
+		case "tree":
+			refreshEditor();
 			break;
-		case "pie3DView":
-			//if(currentView === view) {
-			document.getElementById('pie3DViewFrame').contentWindow.location.reload();
-			// }
-
-			setTimeout(() => {
-				document.getElementById('pie3DViewFrame').contentWindow.externallyLoadedModel = entity;
-				document.getElementById('pie3DViewFrame').contentWindow.hashList = hashListAsObject;
-				document.getElementById('pie3DViewFrame').contentWindow.load(currentlySelected);
-			}, 1000);
-
-			break;
-		default:
-			refreshEditor()
-			break
 	}
 
 	currentView = view

@@ -15,6 +15,7 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 * ZHMModSDK: https://github.com/OrfeasZ/ZHMModSDK/releases
 
 ## Caveats
+* This will cause more crashes! If you are using the mod, make sure that QNE is connect to the server first. If you are not, disable LogPins in the SDK!
 * This will only work on entities that have either fired a pin, have been referenced by one, or are an NPC - see 'Moving random entities' below for deployment-time workaround
 
 ## Installation instructions
@@ -97,6 +98,9 @@ If you want to move a random entity (That doesn't have a pin, nor is it referenc
 ### An entity property won't change
 * Try highlighting the entity (See 'Draw bounding box on entity' above) - if this doesn't work, check that the entity is has output pins or is referenced
 * Move away and return to the entity - especially for enums, sometimes they need to be retrigger to update correctly
+
+### Extra settings
+In `resources/app/piepieonline/settings.json`, but defaults should be good for almost everyone.
 
 ## Source
 * This repo

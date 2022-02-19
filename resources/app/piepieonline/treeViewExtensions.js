@@ -1,4 +1,5 @@
-const { knownProps } = require('./extractedData/knownProps');
+const settings = require('settings.json');
+const knownProps = require('./extractedData/knownProps.json');
 
 function InitialisePieTreeExtensions(selectedId)
 {
@@ -48,7 +49,7 @@ function InitialisePieTreeExtensions(selectedId)
 				}
 			};
 
-		if (hasTransform)
+		if (hasTransform && settings.enableInDevelopmentFeatures)
 			commsItems.setHeroToPosition = {
 				separator_before: !1,
 				icon: !1,
