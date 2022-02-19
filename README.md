@@ -14,7 +14,6 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 ## Installation instructions
 1. Find your QNE installation, and delete the `temp` folder
 2. Copy the entire QNE folder as `PieQNE`, so you should have `QuickEntityEditor` and `PieQNE` next to each other
-3. Download the files from https://drive.google.com/file/d/1QMPoJuvMFnYSGIQGTv-U2ZaWfjyzS4SZ/view?usp=sharing and copy them into the `PieQNE` folder. You should now have `PieQNE\PieGraphHelper\electron.exe` contained within.
 4. Go to https://github.com/piepieonline/QuickEntityEditorPieMod, click the green "Code" button, "Download Zip"
 5. Copy it into the `PieQNE` folder, saying yes to overwriting.
 6. Copy `PieQNE\_H3_Retail_mods\LogPins.dll` into `HITMAN3\Retail\mods`
@@ -25,9 +24,10 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 3. Copy `PieQNE\_H3_Retail_mods\LogPins.dll` into `HITMAN3\Retail\mods`
 
 ## Common usage 
-1. Launch `PieQNE\QuickEntityEditor.exe`, `PieQNE\QuickEntityEditorPieExt.bat` and Hitman (Note: QNE can run multiple times, but 'QuickEntityEditorPieExt.bat' can only run one instance!)
-2. Allow Electron through windows firewall (it's local only, but it's how the game and QNE communicate)
-3. In Hitman, press '`' to open the mod console, and enable 'LogPins'
+1. Launch `PieQNE\QuickEntityEditor.exe`. Load a TEMP, and click 'Connect to Server' in the top right.
+2. Launch Hitman
+3. Allow it through windows firewall if asked (it's local only, but it's how the game and QNE communicate)
+4. In Hitman, press '`' to open the mod console, and enable 'LogPins'
 
 ### Updating properties (Including positions)
 1. Select the entity in the tree view, change the value you care about in the text view.
