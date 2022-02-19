@@ -1,5 +1,5 @@
 {
-    "autoConnectToServer": true,
+    "autoConnectToServer": false,
     "addPieGraph": true,
     "addPie3DView": false,
     "enableInDevelopmentFeatures": false,

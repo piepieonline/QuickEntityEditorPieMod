@@ -109,7 +109,7 @@ If you want to move a random entity (That doesn't have a pin, nor is it referenc
 * Move away and return to the entity - especially for enums, sometimes they need to be retrigger to update correctly
 
 ## Extra settings
-In `resources/app/piepieonline/settings.json`, but defaults should be good for almost everyone.
+In `resources/app/piepieonline/settings.json`. For most people, the only useful option right now is 'autoConnectToServer'.
 
 ## Known bugs/things to work on
 * Only known entities can be highlighted. This is stuck unless/until we get an SDK update with a OnEntity event
