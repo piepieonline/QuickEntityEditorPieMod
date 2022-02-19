@@ -62,6 +62,15 @@ Properties that currently work are:
 1. Right click the entity in the tree view.
 2. Select 'Game Comms' > 'Highlight'
 
+### Getting entity information
+Included in the extension is a list of all default TEMPs, with their known properties and pins (both inputs and outputs).
+There are a few ways that this information is exposed in the extension:
+* Right click the entity in the tree, and select 'Show Help'. The dialog that appears will show a WIP list of all properties and pins.
+* When editing a template instance in the text editor:
+  * Unknown properties will be have an orange underline
+  * After an existing property, add a comma and press Ctrl-Space. If there are more properties that aren't set, a list of valid options will appear.
+  * When adding a new event, after '"onEvent": ' press Ctrl-Space. This will list known events.
+
 ### Watch pins occur in realtime
 1. Click the entity with the event you care about in Tree View
 2. Open Pie Graph View
@@ -99,8 +108,14 @@ If you want to move a random entity (That doesn't have a pin, nor is it referenc
 * Try highlighting the entity (See 'Draw bounding box on entity' above) - if this doesn't work, check that the entity is has output pins or is referenced
 * Move away and return to the entity - especially for enums, sometimes they need to be retrigger to update correctly
 
-### Extra settings
+## Extra settings
 In `resources/app/piepieonline/settings.json`, but defaults should be good for almost everyone.
+
+## Known bugs/things to work on
+* Only known entities can be highlighted. This is stuck unless/until we get an SDK update with a OnEntity event
+* Many more game crashes
+* Not all property types can be updated, or update instantly
+* The 'Show Help' dialog is terrible
 
 ## Source
 * This repo
