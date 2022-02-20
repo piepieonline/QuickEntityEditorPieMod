@@ -31,9 +31,9 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Create ZIP
-        run: zip -r QuickEntityEditorPieMod-${{ env.VERSION }}.zip . -x '*.git*' -x '*_H3_Retail_mods/LogPins.pdb'
+        run: zip -r QuickEntityEditorPieMod-$VERSION.zip . -x '*.git*' -x '*_H3_Retail_mods/LogPins.pdb'
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: QuickEntityEditorPieMod.zip
+          files: QuickEntityEditorPieMod-${{ env.VERSION }}.zip
