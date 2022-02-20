@@ -28,7 +28,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Create ZIP
-        run: zip -r QuickEntityEditorPieMod.zip $GITHUB_WORKSPACE -x .git
+        run: zip -r QuickEntityEditorPieMod.zip . -x '*.git*'
 
       - name: Release
         uses: softprops/action-gh-release@v1
