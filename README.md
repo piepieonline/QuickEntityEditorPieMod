@@ -4,6 +4,7 @@ A runtime bridge between Hitman 3 and QuickEntityEditor (QNE):
 * Runtime updating of most properties (including positions) in QNE, that then change in-game
 * Drawing bounding boxes around ingame objects selected in QNE
 * Highlighting pin events as they happen in QNE, to allow for easier debugging
+
 Plus:
 * Providing a JSON schema of known properties and events in the tree view text editor. This also allows for autocomplete.
 * A 'Show Help' context menu item, to show all known properties, inputs and outputs for a given TEMP

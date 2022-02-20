@@ -56,6 +56,8 @@ function createSchema(template) {
 }
 
 function PieJSONSchema(monaco, template) {
+    if(!knownProps[template]) return;
+
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,
         schemas: [

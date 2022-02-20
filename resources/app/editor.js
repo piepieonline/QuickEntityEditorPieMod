@@ -473,8 +473,11 @@ async function loadEditor() {
 			title: "Select the QuickEntity JSON",
 			buttonLabel: "Select",
 			filters: [{ name: 'JSON files', extensions: ['json'] }],
-			properties: ["openFile"]
+			properties: ["openFile"],
+			defaultPath: localStorage.getItem('defaultEntitySavePath') || process.cwd()
 		})[0]
+
+		localStorage.setItem('defaultEntitySavePath', path.dirname(currentlyOpenedEntity));
 	}
 
 	originalEntityJSON = String(fs.readFileSync(window.sessionStorage.brickToInspect ? path.join("temp", "QuickEntityJSON.json") : currentlyOpenedEntity))

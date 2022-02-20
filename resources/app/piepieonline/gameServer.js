@@ -224,6 +224,15 @@ function convertToSocketProperty(property) {
             ];
             socketProperty.value = `${positions.join('|')}|${rotations.join('|')}`;
             break;
+        case 'SVector3':
+            const vector = [
+                property.value.x.value,
+                property.value.y.value,
+                property.value.z.value
+            ];
+
+            socketProperty.value = vector.join('|');
+            break;
         case 'Guid':
             socketProperty.value = (property.value.value || property.value).toUpperCase();
             break;
