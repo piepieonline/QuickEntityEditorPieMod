@@ -26,12 +26,6 @@ jobs:
       - name: Install ZIP
         run: sudo apt-get install zip
 
-      - name: Echo working dir
-        run: echo $GITHUB_WORKSPACE
-
-      - name: Change working directory
-        run: cd $GITHUB_WORKSPACE
-
       # Runs a set of commands using the runners shell
       - name: Create ZIP
         run: zip -r QuickEntityEditorPieMod.zip . -x '*.git*'
