@@ -15,9 +15,10 @@ Plus:
 * Hitman 3
 * QuickEntityEditor (aka QNE): https://discord.com/channels/555224628251852811/815577522958893096/909406748140511263
 * ZHMModSDK: https://github.com/OrfeasZ/ZHMModSDK/releases
+* Node (You may already have this, but if you get a message that reads "'node' is not recognized as an internal or external command", copy it to `PieQNE\PieGraphHelper\`): https://nodejs.org/dist/v16.14.0/win-x64/node.exe
 
 ## Caveats
-* This will cause more crashes! If you are using the mod, make sure that QNE is connect to the server first. If you are not, disable LogPins in the SDK!
+* This will cause more crashes! If you are using the mod, make sure that QNE is connected to the server first. If you are not, disable LogPins in the SDK!
 * This will only work on entities that have either fired a pin, have been referenced by one, or are an NPC - see 'Moving random entities' below for deployment-time workaround
 * New properties can be added at runtime, but new entities cannot
 
@@ -110,6 +111,10 @@ If you want to move a random entity (That doesn't have a pin, nor is it referenc
 ### An entity property won't change
 * Try highlighting the entity (See 'Draw bounding box on entity' above) - if this doesn't work, check that the entity is has output pins or is referenced
 * Move away and return to the entity - especially for enums, sometimes they need to be retrigger to update correctly
+
+### When trying to launch the server, "'node' is not recognized as an internal or external command, operable program or batch file."
+* Download Node from https://nodejs.org/dist/v16.14.0/win-x64/node.exe
+* Copy the `node.exe` file into `PieQNE\PieGraphHelper\`
 
 ## Extra settings
 In `resources/app/piepieonline/settings.json`. For most people, the only useful option right now is 'autoConnectToServer'.
