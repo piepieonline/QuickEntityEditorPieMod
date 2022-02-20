@@ -94,8 +94,10 @@ function connectToServer()
 }
 
 function RegisterPinListener(requestedPins, pinListenerCallback) {
-    socket.send(JSON.stringify({ type: 'register', requestedPins }));
-    pinListener = pinListenerCallback;
+    if(socket) {
+        socket.send(JSON.stringify({ type: 'register', requestedPins }));
+        pinListener = pinListenerCallback;
+    }
 }
 
 function HighlightInGame(id) {
