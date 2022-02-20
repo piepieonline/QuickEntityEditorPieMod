@@ -24,12 +24,12 @@ Plus:
 ## Installation instructions
 1. Find your QNE installation, and delete the `temp` folder
 2. Copy the entire QNE folder as `PieQNE`, so you should have `QuickEntityEditor` and `PieQNE` next to each other
-4. Go to https://github.com/piepieonline/QuickEntityEditorPieMod, click the green "Code" button, "Download Zip"
+4. Go to https://github.com/piepieonline/QuickEntityEditorPieMod/releases/latest, download `QuickEntityEditorPieMod-v*.*.*.zip`
 5. Copy it into the `PieQNE` folder, saying yes to overwriting.
 6. Copy `PieQNE\_H3_Retail_mods\LogPins.dll` into `HITMAN3\Retail\mods`
 
 ## Updating instructions
-1. Go to https://github.com/piepieonline/QuickEntityEditorPieMod, click the green "Code" button, "Download Zip"
+1. Go to https://github.com/piepieonline/QuickEntityEditorPieMod/releases/latest, download `QuickEntityEditorPieMod-v*.*.*.zip`
 2. Copy it into the `PieQNE` folder, saying yes to overwriting.
 3. Copy `PieQNE\_H3_Retail_mods\LogPins.dll` into `HITMAN3\Retail\mods`
 
