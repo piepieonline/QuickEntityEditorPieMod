@@ -1,10 +1,12 @@
 # Piepieonline's QNE extensions
 
-A bridge between Hitman 3 and QuickEntityEditor (QNE)
-* Runtime updating of properties (including positions) in QNE, that then change in-game
+A runtime bridge between Hitman 3 and QuickEntityEditor (QNE):
+* Runtime updating of most properties (including positions) in QNE, that then change in-game
 * Drawing bounding boxes around ingame objects selected in QNE
-* Providing a JSON schema of known properties and events in the tree view text editor. This also allows for autocomplete.
 * Highlighting pin events as they happen in QNE, to allow for easier debugging
+Plus:
+* Providing a JSON schema of known properties and events in the tree view text editor. This also allows for autocomplete.
+* A 'Show Help' context menu item, to show all known properties, inputs and outputs for a given TEMP
 
 |![Before](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before")|![Updating](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating")|![After](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After")|
 | --- | --- | --- |
@@ -17,6 +19,7 @@ A bridge between Hitman 3 and QuickEntityEditor (QNE)
 ## Caveats
 * This will cause more crashes! If you are using the mod, make sure that QNE is connect to the server first. If you are not, disable LogPins in the SDK!
 * This will only work on entities that have either fired a pin, have been referenced by one, or are an NPC - see 'Moving random entities' below for deployment-time workaround
+* New properties can be added at runtime, but new entities cannot
 
 ## Installation instructions
 1. Find your QNE installation, and delete the `temp` folder
