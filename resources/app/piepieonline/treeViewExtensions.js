@@ -28,7 +28,7 @@ function InitialisePieTreeExtensions(selectedId)
 					let d = editorTree.get_node(b.reference);
 
 					if (isCoverplane || hasVolumeBox)
-						pieServerExtensions.UpdateInGame('draw_volume', d.id || window.ctxTarget.data('id').split('_')[0]);
+						pieServerExtensions.HighlightInGame(d.id || window.ctxTarget.data('id').split('_')[0], true);
 					else
 						pieServerExtensions.HighlightInGame(d.id || window.ctxTarget.data('id').split('_')[0]);
 				}

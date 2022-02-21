@@ -24,12 +24,11 @@ function Initialise() {
 
     updateServerStatus(false, false);
 
-    if(settings.autoConnectToServer)
+    if (settings.autoConnectToServer)
         connectToServer();
 }
 
-function launchAndConnect()
-{
+function launchAndConnect() {
     child_process.exec('start /D .\\PieGraphHelper\\ cmd.exe /K node .\\resources\\app\\index.js');
 
     setTimeout(() => {
@@ -37,8 +36,7 @@ function launchAndConnect()
     }, msToWaitForServerReady);
 }
 
-function connectToServer()
-{
+function connectToServer() {
     socket = new WebSocket(`ws://localhost:${qnePort}`);
     socketIsOpen = false;
 
@@ -60,7 +58,7 @@ function connectToServer()
     });
 
     socket.addEventListener('close', function (event) {
-        if(!socketIsOpen) launchAndConnect();
+        if (!socketIsOpen) launchAndConnect();
         socketIsOpen = false;
         updateServerStatus(false, false);
     });
@@ -94,17 +92,48 @@ function connectToServer()
 }
 
 function RegisterPinListener(requestedPins, pinListenerCallback) {
-    if(socket) {
+    if (socket) {
         socket.send(JSON.stringify({ type: 'register', requestedPins }));
         pinListener = pinListenerCallback;
     }
 }
 
-function HighlightInGame(id) {
+function HighlightInGame(id, isManual) {
     const entity = entities[id];
 
-    if (entity) {
-        socket.send(JSON.stringify({ type: 'highlight', entityId: id }));
+    if (isManual) {
+        let size = [.1, .1, .1];
+
+        if (entity.template === '[modules:/zcoverplane.class].pc_entitytype') {
+            size = [
+                entity.properties.m_fCoverLength.value.value,
+                entity.properties.m_fCoverDepth.value.value,
+                entity.properties.m_eCoverSize.value === 'eLowCover' ? 1 : 2
+            ];
+        }
+        else if (!!entity.properties.m_vGlobalSize) {
+            size = [
+                entity.properties.m_vGlobalSize.value.x.value,
+                entity.properties.m_vGlobalSize.value.y.value,
+                entity.properties.m_vGlobalSize.value.z.value
+            ];
+        }
+
+        socket.send(JSON.stringify({
+            type: 'cover_plane', entityId: id, positions: [
+                entity.properties.m_mTransform.value.position.x.value,
+                entity.properties.m_mTransform.value.position.y.value,
+                entity.properties.m_mTransform.value.position.z.value
+            ], rotations: [
+                entity.properties.m_mTransform.value.rotation.x.value,
+                entity.properties.m_mTransform.value.rotation.y.value,
+                entity.properties.m_mTransform.value.rotation.z.value
+            ], size
+        }));
+    } else {
+        if (entity) {
+            socket.send(JSON.stringify({ type: 'highlight', entityId: id }));
+        }
     }
 }
 
@@ -119,35 +148,6 @@ function UpdateInGame(id, property) {
                 entityId: id,
                 property: propName,
                 ...convertToSocketProperty(entity.properties[propName] || entity.postInitProperties[propName])
-            }));
-        } else if (property === 'draw_volume') {
-            let size = [.1, .1, .1];
-
-            if (entity.template === '[modules:/zcoverplane.class].pc_entitytype') {
-                size = [
-                    entity.properties.m_fCoverLength.value.value,
-                    entity.properties.m_fCoverDepth.value.value,
-                    entity.properties.m_eCoverSize.value === 'eLowCover' ? 1 : 2
-                ];
-            }
-            else if (!!entity.properties.m_vGlobalSize) {
-                size = [
-                    entity.properties.m_vGlobalSize.value.x.value,
-                    entity.properties.m_vGlobalSize.value.y.value,
-                    entity.properties.m_vGlobalSize.value.z.value
-                ];
-            }
-
-            socket.send(JSON.stringify({
-                type: 'cover_plane', entityId: id, positions: [
-                    entity.properties.m_mTransform.value.position.x.value,
-                    entity.properties.m_mTransform.value.position.y.value,
-                    entity.properties.m_mTransform.value.position.z.value
-                ], rotations: [
-                    entity.properties.m_mTransform.value.rotation.x.value,
-                    entity.properties.m_mTransform.value.rotation.y.value,
-                    entity.properties.m_mTransform.value.rotation.z.value
-                ], size
             }));
         } else if (property === 'set_hero_position') {
             socket.send(JSON.stringify({
