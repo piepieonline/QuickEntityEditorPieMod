@@ -522,7 +522,7 @@ function createSnippetEditor() {
 			theme: "vs-dark"
 		})
 
-		pieEditorExtensions.PieMonacoExtensions(snippetEditor);
+		pieEditorExtensions.PieMonacoExtensions(monaco, snippetEditor);
 	})
 }
 
