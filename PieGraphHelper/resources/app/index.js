@@ -137,11 +137,6 @@ function loadServer(shouldLog, callback) {
                     if(currentGameConnectionInfo)
                         gameServer.send(`H|${new Decimal("0x" + message.entityId).toFixed()}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
-                case 'update_position':
-                    console.log(message.entityId)
-                    if(currentGameConnectionInfo)
-                        gameServer.send(`P|${new Decimal("0x" + message.entityId).toFixed()}|${message.positions.join('|')}|${message.rotations.join('|')}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
-                    break;
                 case 'cover_plane':
                     console.log(message.entityId)
                     if(currentGameConnectionInfo)
@@ -160,6 +155,9 @@ function loadServer(shouldLog, callback) {
                     if(currentGameConnectionInfo)
                         gameServer.send(`UpdateProperty|${new Decimal("0x" + message.entityId).toFixed()}|${message.property}|${message.propertyType}|${message.value}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
                     break;
+                case 'signal_pin':
+                    if(currentGameConnectionInfo)
+                        gameServer.send(`SignalPin|${new Decimal("0x" + message.entityId).toFixed()}|${message.pinType}|${message.pinName}`, currentGameConnectionInfo.port, currentGameConnectionInfo.address);
             }
         });
     });

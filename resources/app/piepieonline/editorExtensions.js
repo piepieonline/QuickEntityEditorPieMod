@@ -98,15 +98,45 @@ function PieMonacoExtensions(snippetEditor) {
             if (entity.entities[entityId]) { entity.entities[entityId] = LosslessJSON.parse(snippetEditor.getValue()) }
 
             if (entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName])) {
-                if (propertyName === 'm_mTransform') {
-                    pieServerExtensions.UpdateInGame('position', entityId);
-                }
-                else {
-                    pieServerExtensions.UpdateInGame('property_' + propertyName, entityId);
+                pieServerExtensions.UpdateInGame(entityId, 'property_' + propertyName);
+            }
+        }
+    });
+
+    snippetEditor.addAction({
+        id: 'fire-pin-ingame',
+        label: 'Run event in-game',
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: .11,
+        run: function (ed) {
+            const eventName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
+            const start = snippetEditor.getModel().findPreviousMatch('{', ed.getPosition());
+            const end = snippetEditor.getModel().findNextMatch('}', ed.getPosition());
+
+            const event = JSON.parse(snippetEditor.getModel().getValueInRange({
+                startLineNumber: start.range.startLineNumber,
+                startColumn: start.range.startColumn,
+                endLineNumber: end.range.endLineNumber,
+                endColumn: end.range.endColumn,
+            }));
+
+            const matches = snippetEditor.getModel().findPreviousMatch(`"(onEvent)":.?"${eventName}|"(shouldTrigger)":.?"${eventName}`, ed.getPosition(), true, false, null, true).matches;
+            let wasInputPin = null;
+            if(matches.length >= 2) {
+                wasInputPin = matches[2] === 'shouldTrigger';
+            }
+
+            const entityId = currentlySelected;
+
+            if (entityId && wasInputPin !== null) {
+                if(wasInputPin) {
+                    pieServerExtensions.CallInGame(event.onEntity, eventName, 'Input');
+                } else {
+                    pieServerExtensions.CallInGame(entityId, eventName, 'Output');
                 }
             }
         }
-    })
+    });
 }
 
 module.exports = {

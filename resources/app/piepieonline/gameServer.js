@@ -108,7 +108,7 @@ function HighlightInGame(id) {
     }
 }
 
-function UpdateInGame(property, id) {
+function UpdateInGame(id, property) {
     const entity = entities[id];
 
     if (entity) {
@@ -119,18 +119,6 @@ function UpdateInGame(property, id) {
                 entityId: id,
                 property: propName,
                 ...convertToSocketProperty(entity.properties[propName] || entity.postInitProperties[propName])
-            }));
-        } else if (property === 'position') {
-            socket.send(JSON.stringify({
-                type: 'update_position', entityId: id, positions: [
-                    entity.properties.m_mTransform.value.position.x.value,
-                    entity.properties.m_mTransform.value.position.y.value,
-                    entity.properties.m_mTransform.value.position.z.value
-                ], rotations: [
-                    entity.properties.m_mTransform.value.rotation.x.value,
-                    entity.properties.m_mTransform.value.rotation.y.value,
-                    entity.properties.m_mTransform.value.rotation.z.value
-                ]
             }));
         } else if (property === 'draw_volume') {
             let size = [.1, .1, .1];
@@ -175,6 +163,15 @@ function UpdateInGame(property, id) {
             }));
         }
     }
+}
+
+function CallInGame(id, pinName, pinType) {
+    socket.send(JSON.stringify({
+        type: 'signal_pin',
+        entityId: id,
+        pinName,
+        pinType
+    }));
 }
 
 function RequestPosition(idToChange) {
@@ -256,5 +253,6 @@ module.exports = {
     RegisterPinListener,
     HighlightInGame,
     UpdateInGame,
+    CallInGame,
     RequestPosition
 };
