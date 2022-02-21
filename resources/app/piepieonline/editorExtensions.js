@@ -2,6 +2,9 @@ const LosslessJSON = require("lossless-json")
 
 const pieServerExtensions = require('./gameServer');
 const knownProps = require('./extractedData/knownProps.json');
+const moduleList = require('./extractedData/moduleList.json');
+
+const moduleBlueprintList = moduleList.map(module => module.replace(/type$/, 'blueprint'));
 
 function createSchema(template) {
     const schemaTemplate = {
@@ -10,6 +13,22 @@ function createSchema(template) {
         schema: {
             type: 'object',
             properties: {
+                template: {
+                    type: 'string',
+                    oneOf: [{
+                        enum: moduleList
+                    }, {
+                        pattern: '^[A-Za-z0-9]{16}$|^\\[assembly.*pc_entitytype$'
+                    }]
+                },
+                blueprint: {
+                    type: 'string',
+                    oneOf: [{
+                        enum: moduleBlueprintList
+                    }, {
+                        pattern: '^[A-Za-z0-9]{16}$|^\\[assembly.*pc_entityblueprint$'
+                    }]
+                },
                 properties: {
                     type: 'object',
                     additionalProperties: false,
@@ -56,7 +75,7 @@ function createSchema(template) {
 }
 
 function PieJSONSchema(monaco, template) {
-    if(!knownProps[template]) return;
+    if (!knownProps[template]) return;
 
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,
@@ -78,14 +97,11 @@ function PieMonacoExtensions(snippetEditor) {
 
             if (entity.entities[entityId]) { entity.entities[entityId] = LosslessJSON.parse(snippetEditor.getValue()) }
 
-            if(entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName]))
-            {
-                if(propertyName === 'm_mTransform')
-                {
+            if (entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName])) {
+                if (propertyName === 'm_mTransform') {
                     pieServerExtensions.UpdateInGame('position', entityId);
                 }
-                else
-                {
+                else {
                     pieServerExtensions.UpdateInGame('property_' + propertyName, entityId);
                 }
             }

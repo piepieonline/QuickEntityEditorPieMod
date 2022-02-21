@@ -14,7 +14,7 @@ Plus:
 
 ## Requirements
 * Hitman 3
-* QuickEntityEditor (aka QNE): https://discord.com/channels/555224628251852811/815577522958893096/909406748140511263
+* QuickEntityEditor (aka QNE): [Download](https://www.dropbox.com/s/p1mkwm3ji0uyr8n/QuickEntityEditor.7z?dl=1) - [Instructions](https://discord.com/channels/555224628251852811/815577522958893096/909406748140511263)
 * ZHMModSDK: https://github.com/OrfeasZ/ZHMModSDK/releases
 * Node (You may already have this, but if you get a message that reads "'node' is not recognized as an internal or external command", copy it to `PieQNE\PieGraphHelper\`): https://nodejs.org/dist/v16.14.0/win-x64/node.exe
 
