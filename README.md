@@ -2,6 +2,7 @@
 
 A runtime bridge between Hitman 3 and QuickEntityEditor (QNE):
 * Runtime updating of most properties (including positions) in QNE, that then change in-game
+* Triggering pin events in game from QNE
 * Drawing bounding boxes around ingame objects selected in QNE
 * Highlighting pin events as they happen in QNE, to allow for easier debugging
 
@@ -42,8 +43,8 @@ Plus:
 4. In Hitman, press '`' to open the mod console, and enable 'LogPins'
 
 ### Updating properties (Including positions)
-1. Select the entity in the tree view, change the value you care about in the text view.
-2. Select another entity, and select your first entity again.
+1. Select the entity in the tree view.
+2. Change the value you care about in the text view.
 3. Right click the property name, and click 'Update Property in-game'
 
 *Note*: Only some property types can be updated, and not all will actually reflect in-game (TBD What about loading after changing?)
@@ -55,6 +56,7 @@ Properties that currently work are:
 * float32
 * ZGuid
 * SColorRGB
+* SVector3
 * SMatrix43
 * SEntityTemplateReference
 
@@ -67,11 +69,25 @@ Properties that currently work are:
 1. Right click the entity in the tree view.
 2. Select 'Game Comms' > 'Highlight'
 
+### Fire a pin (Event) in game from QNE
+1. Select the entity in the tree view.
+2. Right click the event name and click "Run event in-game"
+Example:
+```
+{
+		"onEvent": "OnTrue",
+		"shouldTrigger": "Activate",
+		"onEntity": "abcdc38640d82521"
+	}
+```
+Right click `OnTrue` to send the `OnTrue` output event of your current entity. Right click `Activate` to cause only the `Activate` input event to happen on `abcdc38640d82521`.
+
 ### Getting entity information
 Included in the extension is a list of all default TEMPs, with their known properties and pins (both inputs and outputs).
 There are a few ways that this information is exposed in the extension:
 * Right click the entity in the tree, and select 'Show Help'. The dialog that appears will show a WIP list of all properties and pins.
 * When editing a template instance in the text editor:
+  * Pressing Ctrl-Space after `"template":` and `"blueprint":` will list all available modules
   * Unknown properties will be have an orange underline
   * After an existing property, add a comma and press Ctrl-Space. If there are more properties that aren't set, a list of valid options will appear.
   * When adding a new event, after '"onEvent": ' press Ctrl-Space. This will list known events.
