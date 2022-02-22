@@ -10,8 +10,9 @@ Plus:
 * Providing a JSON schema of known properties and events in the tree view text editor. This also allows for autocomplete.
 * A 'Show Help' context menu item, to show all known properties, inputs and outputs for a given TEMP
 
-|![Before](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before")|![Updating](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating")|![After](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After")|
+|![Before updating property](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before updating property")|![Updating property](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true "Updating property")|![After updating property](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After updating property")|
 | --- | --- | --- |
+|![Before triggering event](resources/app/piepieonline/readme/eventBeforeState.png?raw=true "Before triggering event")|![Triggering event](resources/app/piepieonline/readme/eventRunMenu.png?raw=true "Triggering event")|![After triggering event](resources/app/piepieonline/readme/eventAfterState.png?raw=true "After triggering event")|
 
 ## Requirements
 * Hitman 3
