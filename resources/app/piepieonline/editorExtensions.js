@@ -108,7 +108,7 @@ function PieMonacoExtensions(monaco, snippetEditor) {
 
     const showUpdatePropertyCondition = customContextKey('showUpdatePropertyCondition', false);
     const showFirePinCondition = customContextKey('showFirePinCondition', false);
-    const showHighlightCondition = customContextKey('showHighlightCondition', false);
+    const showHighlightCondition = customContextKey('showHighlightCondition', true);
     
     const contextmenu = snippetEditor.getContribution('editor.contrib.contextmenu')
     const realOnContextMenuMethod = contextmenu._onContextMenu;
@@ -138,9 +138,9 @@ function PieMonacoExtensions(monaco, snippetEditor) {
                 }
             }
             showFirePinCondition.set(isEventKey);
-
-            showHighlightCondition.set(parsed.properties['m_mTransform'] || parsed.postInitProperties['m_mTransform']);
         }
+
+        showHighlightCondition.set(parsed?.properties['m_mTransform'] || parsed?.postInitProperties['m_mTransform']);
 
         realOnContextMenuMethod.apply(contextmenu, arguments);
     };
@@ -156,6 +156,69 @@ function PieMonacoExtensions(monaco, snippetEditor) {
             arguments[0].splice(index, 0, arguments[0].find(item => item.id === 'vs.actions.separator'))
 
         realDoShowContextMenuMethod.apply(contextmenu, arguments);
+
+        // Force different enable states, to enable keyboard commands
+        showUpdatePropertyCondition.set(false);
+        showFirePinCondition.set(false);
+        showHighlightCondition.set(true);
+    }
+
+    snippetEditor.addAction({
+        id: 'keybind-action-selector',
+        label: 'Update property/fire event',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_Y],  // Actually used
+        run: function (ed) {
+            const propertyName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
+            const entityId = currentlySelected;
+
+            const entity = JSON.parse(snippetEditor.getValue());
+
+            if (entityId && propertyName && (entity.properties[propertyName] || entity.postInitProperties[propertyName])) {
+                updatePropertyAction(ed);
+            } else {
+                firePinAction(ed);
+            }
+        }
+    })
+
+    function updatePropertyAction(ed) {
+        const propertyName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
+        const entityId = currentlySelected;
+
+        if (entity.entities[entityId]) { entity.entities[entityId] = LosslessJSON.parse(snippetEditor.getValue()) }
+
+        if (entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName])) {
+            pieServerExtensions.UpdateInGame(entityId, 'property_' + propertyName);
+        }
+    }
+
+    function firePinAction(ed) {
+        const eventName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
+        const start = snippetEditor.getModel().findPreviousMatch('{', ed.getPosition());
+        const end = snippetEditor.getModel().findNextMatch('}', ed.getPosition());
+
+        const event = JSON.parse(snippetEditor.getModel().getValueInRange({
+            startLineNumber: start.range.startLineNumber,
+            startColumn: start.range.startColumn,
+            endLineNumber: end.range.endLineNumber,
+            endColumn: end.range.endColumn,
+        }));
+
+        const matches = snippetEditor.getModel().findPreviousMatch(`"(onEvent)":.?"${eventName}|"(shouldTrigger)":.?"${eventName}`, ed.getPosition(), true, false, null, true).matches;
+        let wasInputPin = null;
+        if (matches.length >= 2) {
+            wasInputPin = matches[2] === 'shouldTrigger';
+        }
+
+        const entityId = currentlySelected;
+
+        if (entityId && wasInputPin !== null) {
+            if (wasInputPin) {
+                pieServerExtensions.CallInGame(event.onEntity, eventName, 'Input');
+            } else {
+                pieServerExtensions.CallInGame(entityId, eventName, 'Output');
+            }
+        }
     }
 
     snippetEditor.addAction({
@@ -163,18 +226,9 @@ function PieMonacoExtensions(monaco, snippetEditor) {
         label: 'Update property in-game',
         contextMenuGroupId: 'navigation',
         contextMenuOrder: .1,
-        // keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_U],
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_Y], // Not used, but causes it to show on the menu
         precondition: 'showUpdatePropertyCondition',
-        run: function (ed) {
-            const propertyName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
-            const entityId = currentlySelected;
-
-            if (entity.entities[entityId]) { entity.entities[entityId] = LosslessJSON.parse(snippetEditor.getValue()) }
-
-            if (entityId && propertyName && (entity.entities[entityId].properties[propertyName] || entity.entities[entityId].postInitProperties[propertyName])) {
-                pieServerExtensions.UpdateInGame(entityId, 'property_' + propertyName);
-            }
-        }
+        run: updatePropertyAction
     });
 
     snippetEditor.addAction({
@@ -182,36 +236,9 @@ function PieMonacoExtensions(monaco, snippetEditor) {
         label: 'Run event in-game',
         contextMenuGroupId: 'navigation',
         contextMenuOrder: .11,
-        // keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_U],
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_Y], // Not used, but causes it to show on the menu
         precondition: 'showFirePinCondition',
-        run: function (ed) {
-            const eventName = snippetEditor.getModel().getWordAtPosition(ed.getPosition()).word;
-            const start = snippetEditor.getModel().findPreviousMatch('{', ed.getPosition());
-            const end = snippetEditor.getModel().findNextMatch('}', ed.getPosition());
-
-            const event = JSON.parse(snippetEditor.getModel().getValueInRange({
-                startLineNumber: start.range.startLineNumber,
-                startColumn: start.range.startColumn,
-                endLineNumber: end.range.endLineNumber,
-                endColumn: end.range.endColumn,
-            }));
-
-            const matches = snippetEditor.getModel().findPreviousMatch(`"(onEvent)":.?"${eventName}|"(shouldTrigger)":.?"${eventName}`, ed.getPosition(), true, false, null, true).matches;
-            let wasInputPin = null;
-            if (matches.length >= 2) {
-                wasInputPin = matches[2] === 'shouldTrigger';
-            }
-
-            const entityId = currentlySelected;
-
-            if (entityId && wasInputPin !== null) {
-                if (wasInputPin) {
-                    pieServerExtensions.CallInGame(event.onEntity, eventName, 'Input');
-                } else {
-                    pieServerExtensions.CallInGame(entityId, eventName, 'Output');
-                }
-            }
-        }
+        run: firePinAction
     });
 
     snippetEditor.addAction({
@@ -219,12 +246,15 @@ function PieMonacoExtensions(monaco, snippetEditor) {
         label: 'Highlight entity in-game',
         contextMenuGroupId: 'navigation',
         contextMenuOrder: .12,
-        // keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_H],
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_H],
         precondition: 'showHighlightCondition',
         run: function (ed) {
             const entityId = currentlySelected;
 
             const entity = JSON.parse(snippetEditor.getModel().getValue());
+
+            if(!entity.properties['m_mTransform'] && !entity.postInitProperties['m_mTransform'])
+                return;
 
             const isCoverplane = entity.template === '[modules:/zcoverplane.class].pc_entitytype';
             const hasVolumeBox = !!entity.properties.m_vGlobalSize;
