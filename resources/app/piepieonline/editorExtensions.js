@@ -61,11 +61,29 @@ function createSchema(template) {
     };
 
     for (const prop in knownProps[template].p) {
+        let propValues = 'any';
+        let defaultValue = null;
+
+        if (allEnums[knownProps[template].p[prop]]) {
+            propValues = {
+                type: 'string',
+                enum: allEnums[knownProps[template].p[prop]]
+            };
+        }
+
+        if(knownProps[template].p[prop] === 'TArray<SEntityTemplateReference>') {
+            defaultValue = [];
+        }
+
         schemaTemplate.schema.properties.properties.properties[prop] = {
             type: 'object',
             default: {
                 type: knownProps[template].p[prop],
-                value: null
+                value: defaultValue
+            },
+            properties: {
+                type: 'string',
+                value: propValues
             }
         };
     }
@@ -109,7 +127,7 @@ function PieMonacoExtensions(monaco, snippetEditor) {
     const showUpdatePropertyCondition = customContextKey('showUpdatePropertyCondition', false);
     const showFirePinCondition = customContextKey('showFirePinCondition', false);
     const showHighlightCondition = customContextKey('showHighlightCondition', true);
-    
+
     const contextmenu = snippetEditor.getContribution('editor.contrib.contextmenu')
     const realOnContextMenuMethod = contextmenu._onContextMenu;
     contextmenu._onContextMenu = function () {
@@ -123,16 +141,16 @@ function PieMonacoExtensions(monaco, snippetEditor) {
             word = false;
         }
 
-        if(!word) {
+        if (!word) {
             showUpdatePropertyCondition.set(false);
             showFirePinCondition.set(false);
         } else {
             showUpdatePropertyCondition.set(parsed.properties[word] || parsed.postInitProperties[word]);
-    
+
             let isEventKey = false;
-            if(parsed.events?.length > 0) {
-                for(let parsedEvent of parsed.events) {
-                    if(parsedEvent.onEvent === word || parsedEvent.shouldTrigger === word) {
+            if (parsed.events?.length > 0) {
+                for (let parsedEvent of parsed.events) {
+                    if (parsedEvent.onEvent === word || parsedEvent.shouldTrigger === word) {
                         isEventKey = true;
                     }
                 }
@@ -146,13 +164,13 @@ function PieMonacoExtensions(monaco, snippetEditor) {
     };
 
     const realDoShowContextMenuMethod = contextmenu._doShowContextMenu;
-    contextmenu._doShowContextMenu = function() {
+    contextmenu._doShowContextMenu = function () {
         let index = 0;
-        if(showUpdatePropertyCondition.get()) index++;
-        if(showFirePinCondition.get()) index++;
-        if(showHighlightCondition.get()) index++;
+        if (showUpdatePropertyCondition.get()) index++;
+        if (showFirePinCondition.get()) index++;
+        if (showHighlightCondition.get()) index++;
 
-        if(index > 0)
+        if (index > 0)
             arguments[0].splice(index, 0, arguments[0].find(item => item.id === 'vs.actions.separator'))
 
         realDoShowContextMenuMethod.apply(contextmenu, arguments);
@@ -221,11 +239,13 @@ function PieMonacoExtensions(monaco, snippetEditor) {
         }
     }
 
+    let menuOrder = 0;
+
     snippetEditor.addAction({
         id: 'update-property-ingame',
         label: 'Update property in-game',
         contextMenuGroupId: 'navigation',
-        contextMenuOrder: .1,
+        contextMenuOrder: menuOrder++,
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_Y], // Not used, but causes it to show on the menu
         precondition: 'showUpdatePropertyCondition',
         run: updatePropertyAction
@@ -235,7 +255,7 @@ function PieMonacoExtensions(monaco, snippetEditor) {
         id: 'fire-pin-ingame',
         label: 'Run event in-game',
         contextMenuGroupId: 'navigation',
-        contextMenuOrder: .11,
+        contextMenuOrder: menuOrder++,
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_Y], // Not used, but causes it to show on the menu
         precondition: 'showFirePinCondition',
         run: firePinAction
@@ -245,7 +265,7 @@ function PieMonacoExtensions(monaco, snippetEditor) {
         id: 'highlight-entity-ingame',
         label: 'Highlight entity in-game',
         contextMenuGroupId: 'navigation',
-        contextMenuOrder: .12,
+        contextMenuOrder: menuOrder++,
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_H],
         precondition: 'showHighlightCondition',
         run: function (ed) {
@@ -253,13 +273,25 @@ function PieMonacoExtensions(monaco, snippetEditor) {
 
             const entity = JSON.parse(snippetEditor.getModel().getValue());
 
-            if(!entity.properties['m_mTransform'] && !entity.postInitProperties['m_mTransform'])
+            if (!entity.properties['m_mTransform'] && !entity.postInitProperties['m_mTransform'])
                 return;
 
             const isCoverplane = entity.template === '[modules:/zcoverplane.class].pc_entitytype';
             const hasVolumeBox = !!entity.properties.m_vGlobalSize;
 
             pieServerExtensions.HighlightInGame(entityId, isCoverplane || hasVolumeBox);
+        }
+    });
+
+    snippetEditor.addAction({
+        id: 'force-parse',
+        label: 'Force parse',
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: menuOrder++,
+        run: () => {
+            const entityId = currentlySelected;
+
+            if (entity.entities[entityId]) { entity.entities[entityId] = LosslessJSON.parse(snippetEditor.getValue()) }
         }
     });
 }

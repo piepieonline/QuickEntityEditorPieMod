@@ -59,7 +59,7 @@ function InitialisePieTreeExtensions(selectedId)
 				action: function (b) {
 					let d = editorTree.get_node(b.reference);
 
-					pieServerExtensions.UpdateInGame('set_hero_position', d.id || window.ctxTarget.data('id').split('_')[0]);
+					pieServerExtensions.UpdateInGame(d.id || window.ctxTarget.data('id').split('_')[0], 'set_hero_position');
 				}
 			};
 

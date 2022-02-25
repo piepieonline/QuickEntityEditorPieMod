@@ -13,6 +13,7 @@ Plus:
 |![Before updating property](resources/app/piepieonline/readme/propInitialState.jpg?raw=true "Before updating property")|![Updating property](resources/app/piepieonline/readme/propUpdateContextMenu.png?raw=true&v2 "Updating property")|![After updating property](resources/app/piepieonline/readme/propAfterState.jpg?raw=true "After updating property")|
 | --- | --- | --- |
 |![Before triggering event](resources/app/piepieonline/readme/eventBeforeState.png?raw=true "Before triggering event")|![Triggering event](resources/app/piepieonline/readme/eventRunMenu.png?raw=true "Triggering event")|![After triggering event](resources/app/piepieonline/readme/eventAfterState.png?raw=true "After triggering event")|
+|  | ![Autocomplete](resources/app/piepieonline/readme/autoComplete.png?raw=true "Autocomplete") |  |
 
 ## Requirements
 * Hitman 3

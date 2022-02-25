@@ -339,7 +339,8 @@ async function inspectBrick() {
 			defaultPath: localStorage.getItem('defaultRPKGPath') || ''
 		})[0]
 
-		localStorage.setItem('defaultRPKGPath', path.dirname(rpkgPath));
+		if(rpkgPath)
+			localStorage.setItem('defaultRPKGPath', path.dirname(rpkgPath));
 
 		var rpkgPath2 = electron.remote.dialog.showOpenDialogSync({
 			title: "Select the RPKG to extract the TBLU from",
@@ -1963,7 +1964,8 @@ async function saveEntity(saveAs = false) {
 		});
 	}
 
-	localStorage.setItem('defaultEntitySavePath', path.dirname(currentlyOpenedEntity));
+	if(currentlyOpenedEntity)
+		localStorage.setItem('defaultEntitySavePath', path.dirname(currentlyOpenedEntity));
 
 	let savedEntity = LosslessJSON.stringify(entity)
 	let sizeOfEntity = new TextEncoder().encode(savedEntity).length

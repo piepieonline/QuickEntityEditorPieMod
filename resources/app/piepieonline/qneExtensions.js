@@ -54,7 +54,7 @@ function ChangeView(view) {
 				
 				document.getElementById('pieGraphFrame').contentWindow.Decimal = Decimal;
 				document.getElementById('pieGraphFrame').contentWindow.displayEntityInSnippetEditor = displayEntityInSnippetEditor;
-				document.getElementById('pieGraphFrame').contentWindow.RegisterPinListener = pieServerExtensions.RegisterPinListener;
+				document.getElementById('pieGraphFrame').contentWindow.PieServerExtensions = pieServerExtensions;
 
 				document.getElementById('pieGraphFrame').contentWindow.load(currentlySelected);
 			}, 1000);

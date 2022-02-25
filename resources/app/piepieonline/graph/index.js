@@ -66,6 +66,9 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
         if (event?.target?.isNode && event.target.isNode()) {
             const ele = document.getElementById('context-menu');
             ele.classList.toggle('open');
+
+            (event.target.data('entityInput') || event.target.data('entityOutput')) ? ele.classList.add('pin-selected') : ele.classList.remove('pin-selected');
+
             ele.style.left = event.originalEvent.pageX;
             ele.style.top = event.originalEvent.pageY;
             window.ctxTarget = event.target;
@@ -116,7 +119,7 @@ function load(entityToProcess, MAX_NODE_COUNT = 100) {
     })
 
     // Connection opened
-    window.RegisterPinListener(loggerRequestedNodes, (message) => {
+    window.PieServerExtensions.RegisterPinListener(loggerRequestedNodes, (message) => {
         const node = cy.getElementById(`${message.qeID}_${message.pinName}`);
         const edges = node.connectedEdges();
         node.addClass('fired-event');
@@ -188,6 +191,17 @@ function ctxAddToIgnore(target) {
         })
     }
 
+    closeContextMenu();
+}
 
+function ctxHighlight() {
+    const id = window.ctxTarget.data('id').split('_')[0];
+    window.PieServerExtensions.HighlightInGame(id, false);
+    closeContextMenu();
+}
+
+function ctxFirePin() {
+    const [id, pin] = window.ctxTarget.data('id').split('_');
+    window.PieServerExtensions.CallInGame(id, pin, window.ctxTarget.data('entityInput') ? 'Input' : 'Output');
     closeContextMenu();
 }

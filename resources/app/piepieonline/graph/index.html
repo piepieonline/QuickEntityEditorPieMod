@@ -20,6 +20,14 @@
             flex-direction: column;
             text-align: center;
         }
+
+        .context-menu .pin {
+            display: none;
+        }
+
+        .context-menu.pin-selected .pin {
+            display: block;
+        }
     </style>
 </head>
 
@@ -59,8 +67,8 @@
         <button onclick="collapse()">Collapse all selected</button>
         <button onclick="expand()">Expand all selected</button>
         <br />
-        <button onclick="highlightInGame()">Highlight in-game</button>
-        <button onclick="updateInGame('position')">Update in-game position</button>
+        <button onclick="ctxHighlight()">Highlight in-game</button>
+        <button class="pin" onclick="ctxFirePin()">Fire pin</button>
     </div>
 </body>
 
